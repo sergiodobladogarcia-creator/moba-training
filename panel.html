@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Panel · Moba Training</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="logo" href="index.html"><span class="mark" role="img" aria-label="Logo de Moba Training"></span>Moba Training</a>
+    <nav aria-label="Navegación"><a href="index.html" target="_blank">Ver la web</a><a href="#" id="salir">Salir</a></nav>
+  </div>
+</header>
+
+<main class="wrap" id="sin-acceso" hidden>
+  <div class="auth"><div class="card"><h2 style="font-size:24px">Panel de la profesora</h2><p class="muted">Entra con tu cuenta de profesora para ver el panel.</p><a class="btn btn-p" href="cuenta.html">Entrar</a></div></div>
+</main>
+
+<main class="wrap" id="panel" hidden>
+  <div class="app-head">
+    <div><p class="eyebrow" id="hoy"></p><h1>Hola, María</h1></div>
+    <div class="acts"><button class="btn btn-g btn-s" id="invitar">Invitar a una alumna</button><button class="btn btn-p btn-s" id="nueva-clase">Crear clase</button></div>
+  </div>
+  <div class="app-tabs" role="tablist" id="tabs">
+    <button role="tab" data-v="resumen" aria-selected="true">Resumen</button>
+    <button role="tab" data-v="agenda">Agenda</button>
+    <button role="tab" data-v="clientes">Alumnas</button>
+    <button role="tab" data-v="facturacion">Facturación<span class="badge" id="b-pend" hidden></span></button>
+    <button role="tab" data-v="retencion">Bajas y avisos<span class="badge" id="b-ret" hidden></span></button>
+    <button role="tab" data-v="videos">Vídeos</button>
+    <button role="tab" data-v="tarifas">Tarifas</button>
+    <button role="tab" data-v="contactos">Contactos guía</button>
+  </div>
+
+  <!-- RESUMEN -->
+  <section class="view" id="p-resumen">
+    <div class="kpis" id="kpis"></div>
+    <div class="g2">
+      <div class="stack">
+        <div class="card"><h3>Clases de hoy</h3><div id="hoy-clases"></div></div>
+        <div class="card"><h3>Ingresos de los últimos 6 meses</h3><div class="bars" id="bars"></div></div>
+      </div>
+      <div class="stack">
+        <div class="card"><h3>Pagos por confirmar</h3><div id="res-pend"></div></div>
+        <div class="card"><h3>Bonos que caducan pronto</h3><p class="tiny muted">«Avisar» abre un borrador de Gmail con un mensaje para que renueve.</p><div id="res-cad"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AGENDA -->
+  <section class="view" id="p-agenda" hidden>
+    <div class="weekbar">
+      <button class="btn btn-g btn-xs" id="w-prev" aria-label="Semana anterior">←</button><b class="num" id="w-lbl"></b><button class="btn btn-g btn-xs" id="w-next" aria-label="Semana siguiente">→</button>
+      <button class="btn btn-l" id="w-hoy">Hoy</button>
+      <span style="margin-left:auto" class="acts"><button class="btn btn-g btn-s" id="huecos">Abrir huecos personales</button><button class="btn btn-p btn-s" id="nueva-clase2">Crear clase</button></span>
+    </div>
+    <div class="days" id="days"></div>
+    <div class="slots" id="agenda"></div>
+  </section>
+
+  <!-- ALUMNAS -->
+  <section class="view" id="p-clientes" hidden>
+    <div class="toolbar">
+      <input class="inp" id="buscar" placeholder="Buscar por nombre, email o teléfono" aria-label="Buscar alumna">
+      <div class="tabs" id="filtro-cli"><button aria-selected="true" data-f="activas">Activas</button><button aria-selected="false" data-f="todas">Todas</button><button aria-selected="false" data-f="bajas">Bajas</button></div>
+      <span class="small muted" id="n-cli" style="margin-left:auto"></span>
+    </div>
+    <div class="tbl"><table><thead><tr><th>Alumna</th><th>Contacto</th><th>Bono</th><th>Última clase</th><th>Alta</th><th></th></tr></thead><tbody id="t-cli"></tbody></table></div>
+  </section>
+
+  <!-- FACTURACIÓN -->
+  <section class="view" id="p-facturacion" hidden>
+    <div class="toolbar">
+      <label class="small" for="mes">Mes</label><input class="inp" type="month" id="mes" style="max-width:180px">
+      <span style="margin-left:auto" class="acts"><button class="btn btn-g btn-s" id="vender">Registrar venta</button><button class="btn btn-g btn-s" id="csv">Descargar CSV</button></span>
+    </div>
+    <div class="kpis" id="kpis-fact"></div>
+    <div class="g2">
+      <div class="card"><h3>Ventas del mes</h3><div class="tbl" style="border:0"><table><thead><tr><th>Nº</th><th>Fecha</th><th>Alumna</th><th>Concepto</th><th>Pago</th><th class="r">Importe</th><th></th></tr></thead><tbody id="t-fact"></tbody></table></div></div>
+      <div class="stack">
+        <div class="card"><h3>Pendientes de pago</h3><div id="fact-pend"></div></div>
+        <div class="card"><h3>Por tipo</h3><div id="fact-tipo"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RETENCIÓN -->
+  <section class="view" id="p-retencion" hidden>
+    <div class="g3">
+      <div class="card"><h3>Bonos que caducan o se acaban</h3><p class="tiny muted">Caducan en 10 días o menos, o les queda 1 clase.</p><div id="ret-cad"></div></div>
+      <div class="card"><h3>Posibles bajas</h3><p class="tiny muted">Sin clases en 21 días o con el bono terminado sin renovar.</p><div id="ret-riesgo"></div></div>
+      <div class="card"><h3>Bajas</h3><div id="ret-bajas"></div></div>
+    </div>
+  </section>
+
+  <!-- VÍDEOS -->
+  <section class="view" id="p-videos" hidden>
+    <div class="toolbar"><p class="small muted">Sube el vídeo a Vimeo, YouTube (oculto) o Google Drive y pega aquí el enlace. Solo lo verán las alumnas con acceso.</p><button class="btn btn-p btn-s" id="nuevo-video" style="margin-left:auto">Añadir vídeo</button></div>
+    <div class="tbl"><table><thead><tr><th>Título</th><th>Disciplina</th><th>Duración</th><th>Acceso</th><th>Estado</th><th></th></tr></thead><tbody id="t-vid"></tbody></table></div>
+  </section>
+
+  <!-- TARIFAS -->
+  <section class="view" id="p-tarifas" hidden>
+    <p class="small muted" style="margin-bottom:12px">Los cambios se ven al momento en la web. Los bonos ya vendidos mantienen su precio.</p>
+    <div class="tbl"><table><thead><tr><th>Producto</th><th>Clases</th><th>Validez</th><th class="r">Precio</th><th>En venta</th><th></th></tr></thead><tbody id="t-prod"></tbody></table></div>
+  </section>
+
+  <!-- CONTACTOS -->
+  <section class="view" id="p-contactos" hidden>
+    <div class="toolbar"><p class="small muted">Personas que pidieron la guía gratis desde la web.</p><span style="margin-left:auto" class="acts"><button class="btn btn-g btn-s" id="copiar-mails">Copiar emails</button><a class="btn btn-p btn-s" id="gmail-todos" target="_blank" rel="noopener" href="#">Escribir a todas en Gmail</a></span></div>
+    <div class="tbl"><table><thead><tr><th>Email</th><th>Fecha</th><th></th></tr></thead><tbody id="t-sus"></tbody></table></div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/comun.js"></script>
+<script src="js/panel.js"></script>
+</body>
+</html>

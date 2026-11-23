@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mi cuenta · Moba Training</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="logo" href="index.html"><span class="mark" role="img" aria-label="Logo de Moba Training"></span>Moba Training</a>
+    <nav aria-label="Navegación">
+      <a href="index.html">Web</a>
+      <a href="index.html#tarifas">Tarifas</a>
+      <a href="#" id="nav-wa" target="_blank" rel="noopener">WhatsApp</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ACCESO -->
+<main id="v-auth" class="wrap" hidden>
+  <div class="auth">
+    <div class="card">
+      <div class="tabs" role="tablist" style="justify-self:start"><button role="tab" id="a-login" aria-selected="true">Entrar</button><button role="tab" id="a-reg" aria-selected="false">Crear cuenta</button></div>
+      <form id="f-login" class="form" novalidate>
+        <h2 style="font-size:26px">Hola de nuevo</h2>
+        <label class="field">Email<input id="l-mail" type="email" autocomplete="email" required></label>
+        <label class="field">Contraseña<input id="l-pass" type="password" autocomplete="current-password" required></label>
+        <button class="btn btn-p" type="submit">Entrar</button>
+        <button class="btn btn-l" type="button" id="l-olvido">He olvidado mi contraseña</button>
+      </form>
+      <form id="f-reg" class="form" novalidate hidden>
+        <h2 style="font-size:26px">Crea tu cuenta</h2>
+        <p class="small muted">Tu primera clase en grupo es gratis.</p>
+        <label class="field">Nombre y apellidos<input id="r-nombre" autocomplete="name" required></label>
+        <label class="field">Email<input id="r-mail" type="email" autocomplete="email" required></label>
+        <label class="field">Móvil con WhatsApp<input id="r-tel" type="tel" autocomplete="tel" placeholder="600 000 000" required><span class="tiny muted" style="font-weight:400">Las clases son por videollamada de WhatsApp a este número.</span></label>
+        <label class="field">Contraseña<input id="r-pass" type="password" autocomplete="new-password" minlength="6" required></label>
+        <label class="check"><input type="checkbox" id="r-legal"> He leído y acepto la <a href="legal.html#privacidad" target="_blank">política de privacidad</a> y las <a href="legal.html#condiciones" target="_blank">condiciones de reserva</a>.</label>
+        <label class="check"><input type="checkbox" id="r-emails"> Quiero recibir novedades, retos y avisos por email.</label>
+        <button class="btn btn-p" type="submit">Crear cuenta</button>
+      </form>
+      <form id="f-nueva" class="form" novalidate hidden>
+        <h2 style="font-size:26px">Nueva contraseña</h2>
+        <label class="field">Escribe tu nueva contraseña<input id="n-pass" type="password" autocomplete="new-password" minlength="6" required></label>
+        <button class="btn btn-p" type="submit">Guardar contraseña</button>
+      </form>
+      <p class="okmsg" id="a-ok" hidden></p>
+    </div>
+  </div>
+</main>
+
+<!-- ÁREA DE ALUMNA -->
+<main id="v-app" class="wrap" hidden>
+  <div class="app-head">
+    <div><p class="eyebrow">Mi cuenta</p><h1 id="saludo">Hola</h1></div>
+    <a class="btn btn-d btn-s" id="ir-panel" href="panel.html" hidden>Ir a mi panel de profesora</a>
+  </div>
+  <div class="app-tabs" role="tablist" id="tabs">
+    <button role="tab" data-v="inicio" aria-selected="true">Inicio</button>
+    <button role="tab" data-v="reservar">Reservar</button>
+    <button role="tab" data-v="bonos">Bonos y pagos</button>
+    <button role="tab" data-v="videoteca">Videoteca</button>
+    <button role="tab" data-v="perfil">Mi perfil</button>
+  </div>
+
+  <section class="view" id="p-inicio">
+    <div class="g2">
+      <div class="stack">
+        <div class="card"><h3>Mis próximas clases</h3><div id="mis-clases"></div></div>
+        <div class="card"><h3>Mi historial</h3><div id="historial"></div></div>
+      </div>
+      <div class="stack">
+        <div id="mis-bonos-res"></div>
+        <div class="card">
+          <h3>Así son las clases</h3>
+          <p class="small muted">A la hora de tu clase, María te llamará por <b>videollamada de WhatsApp</b> al número de tu perfil. Guarda su número para reconocer la llamada:</p>
+          <p style="font-family:var(--f-mono);font-size:18px" id="tel-maria"></p>
+          <a class="btn btn-wa btn-s" id="wa-hola" target="_blank" rel="noopener" href="#">Escribir a María</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="p-reservar" hidden>
+    <div class="weekbar">
+      <div class="tabs" role="tablist"><button role="tab" id="t-grupo" aria-selected="true">Clases en grupo</button><button role="tab" id="t-personal" aria-selected="false">Entrenamiento personal</button></div>
+      <span style="margin-left:auto;display:flex;gap:6px;align-items:center"><button class="btn btn-g btn-xs" id="w-prev" aria-label="Semana anterior">←</button><span class="small num" id="w-lbl"></span><button class="btn btn-g btn-xs" id="w-next" aria-label="Semana siguiente">→</button></span>
+    </div>
+    <div class="days" id="days"></div>
+    <div class="slots" id="slots"></div>
+    <p class="tiny muted" style="margin-top:12px">Cancelación gratuita hasta 8 horas antes: la clase vuelve a tu bono.</p>
+  </section>
+
+  <section class="view" id="p-bonos" hidden>
+    <div class="g2">
+      <div class="stack">
+        <div class="card"><h3>Mis bonos</h3><div id="lista-bonos"></div></div>
+      </div>
+      <div class="stack">
+        <div class="card"><h3>Comprar un bono o cuota</h3><div id="tienda"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="p-videoteca" hidden>
+    <div id="vid-acceso"></div>
+    <div class="vids" id="vid-lista" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:16px"></div>
+  </section>
+
+  <section class="view" id="p-perfil" hidden>
+    <div class="g2">
+      <form class="card form" id="f-perfil" novalidate>
+        <h3>Mis datos</h3>
+        <label class="field">Nombre y apellidos<input id="pf-nombre" autocomplete="name"></label>
+        <label class="field">Email<input id="pf-mail" disabled></label>
+        <label class="field">Móvil con WhatsApp<input id="pf-tel" type="tel" autocomplete="tel"></label>
+        <label class="field">Mi objetivo<textarea id="pf-obj" placeholder="Por ejemplo: fortalecer la espalda, recuperarme de una lesión de rodilla…"></textarea></label>
+        <label class="check"><input type="checkbox" id="pf-emails"> Quiero recibir novedades y avisos por email.</label>
+        <button class="btn btn-p" type="submit" style="justify-self:start">Guardar</button>
+      </form>
+      <div class="stack">
+        <div class="card"><h3>Sesión</h3><button class="btn btn-g btn-s" id="salir" style="justify-self:start">Cerrar sesión</button></div>
+        <div class="card"><h3>Darme de baja</h3><p class="small muted">Tus bonos dejarán de poder usarse para reservar. Si cambias de idea, escribe a María y la reactiva.</p><button class="btn btn-g btn-s" id="baja" style="justify-self:start">Solicitar la baja</button></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/comun.js"></script>
+<script src="js/cuenta.js"></script>
+</body>
+</html>

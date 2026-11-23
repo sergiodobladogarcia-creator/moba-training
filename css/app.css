@@ -1,0 +1,42 @@
+/* Área de alumna y panel de María */
+.app-head{padding-block:28px 8px;display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap}
+.app-head h1{font-size:clamp(28px,4vw,42px);letter-spacing:-.02em;font-weight:800}
+.app-tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:22px}
+.app-tabs button{border:0;background:transparent;padding:12px 14px;font-weight:600;color:var(--muted);border-bottom:2.5px solid transparent;margin-bottom:-1px}
+.app-tabs button[aria-selected="true"]{color:var(--ink);border-color:var(--accent)}
+.app-tabs button .badge{display:inline-grid;place-items:center;min-width:20px;height:20px;border-radius:999px;background:var(--warn);color:#fff;font-size:11px;margin-left:6px;padding-inline:5px}
+.view{padding-bottom:64px}
+.g2{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:start}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.stack{display:grid;gap:16px;min-width:0}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;display:grid;gap:6px;min-width:0}
+.kpi b{font-family:var(--f-display);font-size:32px;letter-spacing:-.02em;line-height:1}
+.kpi span{font-size:13px;color:var(--muted)}
+.meter{height:6px;border-radius:9px;background:var(--sunk);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--accent)}
+.bono{background:var(--deep);color:var(--deep-ink);border-radius:18px;padding:20px;display:grid;gap:10px}
+.bono b.big{font-family:var(--f-display);font-size:36px;line-height:1}
+.bono .meter{background:color-mix(in srgb,var(--deep-ink) 20%,transparent)}
+.bono .meter i{background:var(--gold)}
+.auth{max-width:440px;margin:40px auto 80px}
+.auth .card{padding:26px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.toolbar .inp{max-width:260px}
+.bars{display:flex;align-items:flex-end;gap:8px;height:150px;padding-top:10px}
+.bars div{flex:1;display:grid;gap:4px;justify-items:center;font-size:11px;color:var(--muted);min-width:0}
+.bars i{width:100%;max-width:46px;border-radius:6px 6px 2px 2px;background:var(--accent);display:block;min-height:2px}
+.bars div:last-child i{background:var(--deep)}
+.chiprow{display:flex;gap:6px;flex-wrap:wrap}
+.factura{background:#fff;color:#111;padding:32px;border-radius:12px;font-size:14px;display:grid;gap:16px}
+.factura table th{background:#f1f1f1;color:#444}
+.factura td,.factura th{border-color:#ddd}
+@media print{
+  body *{visibility:hidden}
+  .factura,.factura *{visibility:visible}
+  .factura{position:absolute;inset:0;padding:0}
+}
+@media (max-width:900px){
+  .g2,.g3{grid-template-columns:1fr}
+  .kpis{grid-template-columns:1fr 1fr}
+}

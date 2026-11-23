@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Moba Training · Pilates, yoga y funcional online con María Hernández</title>
+<meta name="description" content="Clases de pilates, yoga y entrenamiento funcional online en directo, en grupos de máximo 6 personas, entrenamientos personales y videoteca. Con María Hernández Cuellar, TSEAS y entrenadora personal.">
+<meta property="og:title" content="Moba Training · Pilates, yoga y funcional online">
+<meta property="og:description" content="Clases en directo en grupos de máximo 6 personas, entrenamiento personal y videoteca. Primera clase en grupo gratis.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/site.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SportsActivityLocation","name":"Moba Training","description":"Clases online de pilates, yoga y entrenamiento funcional, en directo y bajo demanda.","telephone":"+34 682 01 29 56","founder":{"@type":"Person","name":"María Hernández Cuellar","jobTitle":"Técnico Superior en Enseñanza y Animación Sociodeportiva, entrenadora personal"}}
+</script>
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="logo" href="index.html"><span class="mark" role="img" aria-label="Logo de Moba Training"></span>Moba Training</a>
+    <nav class="secc" aria-label="Secciones">
+      <a href="#clases">Clases</a>
+      <a href="#horario">Horario</a>
+      <a href="#videoteca">Videoteca</a>
+      <a href="#sobre">Sobre mí</a>
+      <a href="#tarifas">Tarifas</a>
+    </nav>
+    <a class="btn btn-p btn-s" id="btn-cuenta" href="cuenta.html">Entrar</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <span class="mark hero-mark" aria-hidden="true"></span>
+    <div class="wrap">
+      <div>
+        <p class="eyebrow">Pilates · Yoga · Funcional · en directo y bajo demanda</p>
+        <h1>Tu clase empieza <em>en tu salón</em>, a la hora que te va bien.</h1>
+        <p class="lead">Clases en directo en grupos de máximo 6 personas, entrenamientos personales adaptados a ti y una videoteca para entrenar cuando quieras.</p>
+        <div class="ctas">
+          <a class="btn btn-p" href="#horario">Probar una clase gratis</a>
+          <a class="btn btn-g" href="#tarifas">Ver tarifas</a>
+        </div>
+        <div class="proof">
+          <div><b class="num">6</b><span>personas máx. por grupo</span></div>
+          <div><b class="num">1 a 1</b><span>entrenamiento personal</span></div>
+          <div><b>WhatsApp</b><span>clases por videollamada</span></div>
+        </div>
+      </div>
+      <aside class="live" aria-label="Próxima clase en directo">
+        <div class="live-top"><span class="pill s live">Próxima en directo</span><span class="countdown num" id="cd"></span></div>
+        <div class="screen"><canvas id="breath" width="640" height="360" aria-hidden="true"></canvas></div>
+        <div><h3 id="next-t">Cargando horario…</h3><p class="muted small" id="next-s" style="margin-top:4px"></p></div>
+        <a class="btn btn-p" id="next-b" href="#horario">Ver el horario</a>
+      </aside>
+    </div>
+  </section>
+
+  <section class="how" aria-label="Cómo funciona">
+    <div class="wrap">
+      <ol>
+        <li><span><b>Elige y reserva</b><span>Crea tu cuenta, elige clase en grupo o entrenamiento personal y resérvala en un clic.</span></span></li>
+        <li><span><b>Te llamo por WhatsApp</b><span>A la hora de la clase recibes la videollamada de WhatsApp. No tienes que instalar nada más.</span></span></li>
+        <li><span><b>Entrena desde casa</b><span>Con la cámara encendida te corrijo en directo. En grupo, como mucho sois 6.</span></span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="band alt" id="clases">
+    <div class="wrap">
+      <div class="sec-head"><h2>Tres formas de moverte</h2><p>Todas las clases se pueden hacer con una esterilla y poco espacio. Material opcional: banda elástica y un par de mancuernas ligeras.</p></div>
+      <div class="disc">
+        <article><span class="meta">50 min · todos los niveles</span><h3>Pilates</h3><p>Control, core y postura. Trabajo en suelo con progresiones claras.</p><ul><li>Mat básico y medio</li><li>Pilates con banda</li><li>Espalda sana</li></ul></article>
+        <article><span class="meta">60 min · todos los niveles</span><h3>Yoga</h3><p>Movilidad, fuerza y respiración, desde flujos suaves a vinyasa.</p><ul><li>Vinyasa flow</li><li>Yoga suave y restaurativo</li><li>Yoga para corredores</li></ul></article>
+        <article><span class="meta">45 min · intensidad media-alta</span><h3>Funcional</h3><p>Fuerza y cardio con tu peso corporal. Circuitos que se adaptan a cada nivel.</p><ul><li>Full body</li><li>Glúteo y pierna</li><li>HIIT de 30 min</li></ul></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band dark" id="test">
+    <div class="wrap">
+      <div class="sec-head"><h2>¿Qué clase es para ti?</h2><p>Tres preguntas y te digo por dónde empezar.</p></div>
+      <div class="quiz"><div id="quiz-q"></div><aside class="result" id="quiz-r" aria-live="polite"></aside></div>
+    </div>
+  </section>
+
+  <section class="band" id="horario">
+    <div class="wrap">
+      <div class="sec-head"><h2>Horario y reservas</h2><p>Elige clase en grupo o entrenamiento personal. Cancelación gratuita hasta 8 horas antes. Horario peninsular.</p></div>
+      <div class="horario">
+        <div style="min-width:0">
+          <div class="weekbar">
+            <div class="tabs" role="tablist"><button role="tab" id="t-grupo" aria-selected="true">Clases en grupo</button><button role="tab" id="t-personal" aria-selected="false">Entrenamiento personal</button></div>
+            <span style="margin-left:auto;display:flex;gap:6px;align-items:center"><button class="btn btn-g btn-xs" id="w-prev" aria-label="Semana anterior">←</button><span class="small num" id="w-lbl"></span><button class="btn btn-g btn-xs" id="w-next" aria-label="Semana siguiente">→</button></span>
+          </div>
+          <div class="days" id="days"></div>
+          <div class="slots" id="slots"></div>
+        </div>
+        <aside class="card">
+          <h3>Cómo reservar</h3>
+          <p class="small muted">Necesitas una cuenta gratuita. Tu primera clase en grupo es gratis; después, elige un bono en Tarifas.</p>
+          <p class="small muted" id="hint-personal" hidden>En el entrenamiento personal tú eliges el enfoque: fuerza, recuperación de lesiones, pilates, yoga, funcional o el objetivo que quieras.</p>
+          <a class="btn btn-p" href="cuenta.html">Crear cuenta o entrar</a>
+          <p class="tiny muted">¿No ves una hora que te encaje? <a id="wa-hora" href="#" target="_blank" rel="noopener">Escríbeme por WhatsApp</a>.</p>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="band alt" id="videoteca">
+    <div class="wrap">
+      <div class="sec-head"><h2>Videoteca</h2><p>Para los días en que no llegas al directo. Incluida en la suscripción de videoteca y en Moba Completo.</p></div>
+      <div class="chips" id="chips"></div>
+      <div class="vids" id="vids"></div>
+    </div>
+  </section>
+
+  <section class="band" id="retos">
+    <div class="wrap">
+      <div class="sec-head"><h2>Retos y programas</h2><p>Programas cerrados con un vídeo al día y seguimiento por WhatsApp. Pregúntame por la próxima edición.</p></div>
+      <div class="progs">
+        <article class="prog"><span class="pill a" style="justify-self:start">Pilates · 21 días</span><h3>Core en 21 días</h3><p>15 a 20 minutos al día para notar el abdomen y la postura en tres semanas.</p><div class="dots" data-n="21"></div><div class="foot"><a class="btn btn-g btn-s" data-reto="Core en 21 días" target="_blank" rel="noopener" href="#">Apuntarme</a><b class="num">29 €</b></div></article>
+        <article class="prog"><span class="pill g" style="justify-self:start">Pilates · 4 semanas</span><h3>Espalda sana</h3><p>Movilidad y fuerza suave para quien pasa muchas horas sentada.</p><div class="dots" data-n="28"></div><div class="foot"><a class="btn btn-g btn-s" data-reto="Espalda sana" target="_blank" rel="noopener" href="#">Apuntarme</a><b class="num">39 €</b></div></article>
+        <article class="prog"><span class="pill s" style="justify-self:start">Yoga · 14 días</span><h3>Yoga para empezar</h3><p>Las posturas básicas paso a paso, sin prisa y sin experiencia previa.</p><div class="dots" data-n="14"></div><div class="foot"><a class="btn btn-g btn-s" data-reto="Yoga para empezar" target="_blank" rel="noopener" href="#">Apuntarme</a><b class="num">19 €</b></div></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band alt" id="sobre">
+    <div class="wrap about">
+      <div class="portrait"><span class="mark" aria-hidden="true"></span></div>
+      <div>
+        <p class="eyebrow">Sobre mí</p>
+        <h2>Hola, soy María Hernández Cuellar</h2>
+        <p>Soy Técnico Superior en Enseñanza y Animación Sociodeportiva (TSEAS), profesora de pilates, yoga y entrenamiento funcional, y entrenadora personal. Tengo experiencia guiando a personas de todas las edades y niveles, en grupo y de forma individual.</p>
+        <p>Creo en el movimiento como una forma de cuidarte: ganar fuerza, mejorar la postura, moverte sin dolor y encontrar un rato para ti. Por eso cada clase está pensada con detalle, con explicaciones claras, progresiones adaptadas y correcciones en directo para que entrenes de forma segura.</p>
+        <p>Creé Moba Training para acercar ese acompañamiento a tu casa. Da igual si empiezas desde cero o si ya entrenas: te ayudo a avanzar a tu ritmo, con constancia y disfrutando del proceso.</p>
+        <div class="creds"><span>Técnico Superior TSEAS</span><span>Profesora de pilates</span><span>Profesora de yoga</span><span>Entrenamiento funcional</span><span>Entrenadora personal</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="tarifas">
+    <div class="wrap">
+      <div class="sec-head"><h2>Tarifas</h2><p>Primera clase en grupo gratis. Bonos válidos 60 días desde el pago. Cuotas mensuales sin permanencia.</p></div>
+      <div class="plans" id="plans"></div>
+      <p class="tiny muted" style="margin-top:14px">Precios con IVA incluido. Pago por Bizum, transferencia o en mano; el bono se activa cuando María confirma el pago.</p>
+    </div>
+  </section>
+
+  <section class="band dark" id="regalo">
+    <div class="wrap cta2">
+      <div class="gift">
+        <h3>Regala Moba</h3>
+        <div class="giftcard"><span class="mark" aria-hidden="true"></span><div><span>TARJETA REGALO</span><br><b class="num" id="gift-v"></b></div></div>
+        <div class="o" id="gift-o"></div>
+        <a class="btn btn-d" id="gift-b" target="_blank" rel="noopener" href="#">Pedir tarjeta regalo por WhatsApp</a>
+      </div>
+      <div class="guide">
+        <h3>Guía gratis: 7 ejercicios para la espalda</h3>
+        <p class="muted">Un PDF con fotos para hacer en 10 minutos al día. Te lo envío al email y te aviso de clases nuevas y retos.</p>
+        <form id="guide-f" novalidate>
+          <div class="line"><input id="guide-mail" type="email" placeholder="tu@email.com" aria-label="Tu email" autocomplete="email"><button class="btn btn-p" type="submit">Quiero la guía</button></div>
+          <label class="check"><input type="checkbox" id="guide-ok-rgpd"> Acepto recibir emails de Moba Training y la <a href="legal.html#privacidad" style="color:inherit">política de privacidad</a>. Puedo darme de baja cuando quiera.</label>
+          <p class="err" id="guide-err" hidden></p>
+        </form>
+        <p id="guide-ok" class="okmsg" hidden>¡Apuntada! Te enviaré la guía a tu email en breve.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="faq">
+    <div class="wrap">
+      <div class="sec-head"><h2>Preguntas frecuentes</h2></div>
+      <div class="faq">
+        <details open><summary>¿Cómo son las clases en directo?</summary><p>Por videollamada de WhatsApp. A la hora de la clase te llamo al número que pusiste en tu cuenta. En las clases en grupo sois como mucho 6 personas, así que puedo veros y corregiros a todas.</p></details>
+        <details><summary>¿Qué necesito para hacer las clases?</summary><p>Una esterilla, ropa cómoda y el móvil o una tablet con WhatsApp. Para algunas clases vienen bien una banda elástica y mancuernas ligeras, pero siempre hay alternativa sin material.</p></details>
+        <details><summary>¿Qué puedo trabajar en un entrenamiento personal?</summary><p>Lo que tú necesites: ganar fuerza, recuperarte o prevenir lesiones, mejorar en pilates, yoga o funcional, o prepararte para la actividad que elijas. En la primera sesión vemos tu punto de partida y diseño un plan para ti.</p></details>
+        <details><summary>¿Tengo que encender la cámara?</summary><p>No es obligatorio, pero si la enciendes puedo corregirte la postura en directo. Las clases no se graban.</p></details>
+        <details><summary>¿Qué pasa si no puedo ir a una clase reservada?</summary><p>Puedes cancelarla desde tu cuenta hasta 8 horas antes y la clase vuelve a tu bono. Si cancelas más tarde, la clase se descuenta.</p></details>
+        <details><summary>¿Cómo pago?</summary><p>Eliges el bono en tu cuenta y pagas por Bizum o transferencia. En cuanto recibo el pago, activo tu bono y puedes reservar.</p></details>
+        <details><summary>¿Caducan los bonos?</summary><p>Los bonos de clases en grupo duran 60 días y los de entrenamiento personal, 60 o 90 días desde el pago. Las cuotas mensuales duran 30 días y no tienen permanencia.</p></details>
+        <details><summary>Tengo una lesión o estoy embarazada, ¿puedo entrenar?</summary><p>Consulta primero con tu médico. Después, te recomiendo el entrenamiento personal para adaptar cada ejercicio a tu caso.</p></details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="brand"><span class="mark" aria-hidden="true"></span><b style="font-family:var(--f-display);font-size:20px;color:var(--ink)">Moba Training</b><span>Pilates, yoga y funcional online con María Hernández Cuellar.</span></div>
+    <div><h4>Clases</h4><ul><li><a href="#horario">Horario y reservas</a></li><li><a href="#videoteca">Videoteca</a></li><li><a href="#retos">Retos</a></li><li><a href="#tarifas">Tarifas</a></li><li><a href="cuenta.html">Mi cuenta</a></li></ul></div>
+    <div><h4>Contacto</h4><ul><li>WhatsApp: <span id="f-wa"></span></li><li id="f-mail" hidden></li><li id="f-ig" hidden></li></ul></div>
+    <div><h4>Legal</h4><ul><li><a href="legal.html#aviso">Aviso legal</a></li><li><a href="legal.html#privacidad">Política de privacidad</a></li><li><a href="legal.html#cookies">Política de cookies</a></li><li><a href="legal.html#condiciones">Condiciones de reserva</a></li></ul></div>
+    <div class="legal">© <span id="year"></span> Moba Training · María Hernández Cuellar</div>
+  </div>
+</footer>
+<a class="btn btn-wa wa-float" id="wa-float" target="_blank" rel="noopener" href="#">WhatsApp</a>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/comun.js"></script>
+<script src="js/site.js"></script>
+</body>
+</html>
