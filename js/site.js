@@ -166,14 +166,5 @@
   renderG();
 
   // ---------- guía gratis ----------
-  $('#guide-f').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const mail = $('#guide-mail').value.trim(), err = $('#guide-err');
-    err.hidden = true;
-    if (!/^\S+@\S+\.\S+$/.test(mail)) { err.textContent = 'Escribe un email válido.'; err.hidden = false; return; }
-    if (!$('#guide-ok-rgpd').checked) { err.textContent = 'Marca la casilla para poder enviarte la guía.'; err.hidden = false; return; }
-    const { error } = await sb.from('suscriptores').insert({ email: mail.toLowerCase(), origen: 'guia' });
-    if (error && error.code !== '23505') { err.textContent = 'No se ha podido guardar. Inténtalo de nuevo.'; err.hidden = false; return; }
-    e.target.hidden = true; $('#guide-ok').hidden = false;
-  });
+  $('#guide-wa').href = M.wa('Hola María, me gustaría recibir la guía gratis de 7 ejercicios para la espalda.');
 })();

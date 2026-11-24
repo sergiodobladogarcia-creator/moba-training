@@ -57,27 +57,25 @@
     }).filter(Boolean);
   }
 
-  // ---------- emails de Gmail ----------
-  const firma = '\n\n¡Un abrazo!\nMaría\nMoba Training · WhatsApp ' + C.whatsappVisible + '\n' + BASE;
-  function mailRenovar(b) {
-    const c = cli[b.cliente_id], n = (c.nombre || '').split(' ')[0] || 'hola', q = quedan(b), comp = PROD.find((p) => p.id === 'comp');
-    const asunto = n + ', ¡no pierdas el ritmo! Tu ' + b.nombre.toLowerCase() + ' está a punto de terminar';
-    const cuerpo = 'Hola ' + n + ':\n\n' +
-      'Quería escribirte porque ' + (q != null ? 'te ' + (q === 1 ? 'queda 1 clase' : 'quedan ' + q + ' clases') + ' de tu ' + b.nombre.toLowerCase() + ', que' : 'tu ' + b.nombre.toLowerCase()) + ' es válido hasta el ' + M.fecha(b.caduca + 'T12:00:00', { day: 'numeric', month: 'long' }) + '.\n\n' +
+  // ---------- mensajes de WhatsApp ----------
+  const firma = '\n\nUn abrazo,\nMaría · Moba Training\n' + BASE;
+  const pila = (c) => (c.nombre || '').split(' ')[0] || '';
+  function waRenovar(b) {
+    const c = cli[b.cliente_id], n = pila(c), q = quedan(b), comp = PROD.find((p) => p.id === 'comp');
+    const txt = '¡Hola ' + n + '! 💪\n\n' +
+      'Te escribo porque ' + (q != null ? 'te ' + (q === 1 ? 'queda 1 clase' : 'quedan ' + q + ' clases') + ' de tu ' + b.nombre.toLowerCase() + ', que' : 'tu ' + b.nombre.toLowerCase()) + ' es válido hasta el ' + M.fecha(b.caduca + 'T12:00:00', { day: 'numeric', month: 'long' }) + '.\n\n' +
       'Estoy muy contenta con lo que estás avanzando. La constancia es lo que de verdad marca la diferencia: cada clase suma fuerza, movilidad y bienestar, y sería una pena cortar ahora ese ritmo que tanto te ha costado coger.\n\n' +
-      'Si quieres seguir entrenando conmigo, puedes renovar en un minuto desde tu cuenta:\n' + BASE + 'cuenta.html?comprar=' + (b.producto_id || 'g4') + '\n\n' +
+      'Si quieres seguir, puedes renovar en un minuto desde tu cuenta:\n' + BASE + 'cuenta.html?comprar=' + (b.producto_id || 'g4') + '\n\n' +
       (comp && b.tipo !== 'completo' ? 'Y si quieres aún más, con Moba Completo tienes clases en grupo ilimitadas y toda la videoteca por ' + M.eur(comp.precio) + ' al mes.\n\n' : '') +
-      'Cualquier duda, escríbeme por WhatsApp y lo vemos juntas.' + firma;
-    return M.gmail(c.email, asunto, cuerpo);
+      '¿Lo renovamos? 😊' + firma;
+    return M.wa(txt, M.telWa(c.telefono));
   }
-  function mailVuelve(c) {
-    const n = (c.nombre || '').split(' ')[0] || 'hola';
-    const asunto = n + ', te echo de menos en clase';
-    const cuerpo = 'Hola ' + n + ':\n\nHace unos días que no coincidimos en clase y quería saber qué tal estás.\n\n' +
+  function waVuelve(c) {
+    const txt = '¡Hola ' + pila(c) + '! 🌿\n\nHace unos días que no coincidimos en clase y quería saber qué tal estás.\n\n' +
       'Sé que a veces cuesta encontrar el momento, pero volver es más fácil de lo que parece: una sola clase a la semana ya marca la diferencia en cómo te sientes, en tu postura y en tu energía.\n\n' +
-      'Te dejo el horario para que reserves la que mejor te encaje:\n' + BASE + 'cuenta.html\n\n' +
+      'Aquí tienes el horario para reservar la que mejor te encaje:\n' + BASE + 'cuenta.html\n\n' +
       'Si necesitas que adapte algo (horario, nivel, alguna molestia), dímelo y lo preparo para ti.' + firma;
-    return M.gmail(c.email, asunto, cuerpo);
+    return M.wa(txt, M.telWa(c.telefono));
   }
   async function registrarAviso(cliente_id, bono_id, tipo) {
     const { data } = await sb.from('avisos').insert({ cliente_id, bono_id, tipo }).select().single();
@@ -87,22 +85,21 @@
   function botonAvisar(el) {
     el.querySelectorAll('[data-avisar]').forEach((a) => a.addEventListener('click', () => {
       registrarAviso(a.dataset.cli, a.dataset.bono ? +a.dataset.bono : null, a.dataset.avisar);
-      M.toast('Borrador abierto en Gmail. Revísalo y pulsa Enviar.');
+      M.toast('Mensaje preparado en WhatsApp. Revísalo y pulsa Enviar.');
       setTimeout(() => pintarTodo(), 400);
     }));
   }
   const filaCad = (b) => {
     const c = cli[b.cliente_id], q = quedan(b), d = M.diasHasta(b.caduca);
     return '<div class="row"><div class="l"><b>' + esc(c.nombre || c.email) + '</b><span>' + esc(b.nombre) + ' · ' + (q != null ? q + (q === 1 ? ' clase' : ' clases') + ' · ' : '') + (d <= 0 ? 'caduca hoy' : 'caduca en ' + d + ' d') + '</span>' + avisadoTxt(c.id) + '</div>' +
-      '<div class="acts">' + (c.email ? '<a class="btn btn-p btn-xs" target="_blank" rel="noopener" data-avisar="renovar" data-cli="' + c.id + '" data-bono="' + b.id + '" href="' + esc(mailRenovar(b)) + '">Avisar</a>' : '') +
-      (c.telefono ? '<a class="btn btn-g btn-xs" target="_blank" rel="noopener" href="' + esc(M.wa('Hola ' + (c.nombre || '').split(' ')[0] + ', tu ' + b.nombre.toLowerCase() + ' termina pronto. ¿Lo renovamos? 😊', M.telWa(c.telefono))) + '">WhatsApp</a>' : '') + '</div></div>';
+      '<div class="acts">' + (c.telefono ? '<a class="btn btn-wa btn-xs" target="_blank" rel="noopener" data-avisar="renovar" data-cli="' + c.id + '" data-bono="' + b.id + '" href="' + esc(waRenovar(b)) + '">Avisar por WhatsApp</a>' : '<span class="tiny muted">Sin teléfono</span>') + '</div></div>';
   };
 
   // ================= PESTAÑAS =================
   let vista = 'resumen';
   function tab(v) { vista = v; $$('#tabs button').forEach((b) => b.setAttribute('aria-selected', b.dataset.v === v)); $$('.view').forEach((s) => (s.hidden = s.id !== 'p-' + v)); pintar(v); }
   $$('#tabs button').forEach((b) => (b.onclick = () => tab(b.dataset.v)));
-  function pintar(v) { ({ resumen: pResumen, agenda: pAgenda, clientes: pClientes, facturacion: pFact, retencion: pRet, videos: pVideos, tarifas: pTarifas, contactos: pContactos })[v](); }
+  function pintar(v) { ({ resumen: pResumen, agenda: pAgenda, clientes: pClientes, facturacion: pFact, retencion: pRet, videos: pVideos, tarifas: pTarifas })[v](); }
   function pintarTodo() {
     const pend = B.filter((b) => b.estado_pago === 'pendiente').length, ret = caducanPronto().length;
     $('#b-pend').hidden = !pend; $('#b-pend').textContent = pend;
@@ -272,8 +269,8 @@
     const c = cli[id], bs = bonosDe(id), rs = resDe(id).slice(0, 10);
     M.modal('<h3>' + esc(c.nombre || c.email) + '</h3><p class="small muted">' + esc(c.email) + ' · ' + esc(c.telefono) + ' · alta el ' + M.fechaCorta(c.fecha_alta) + (c.estado === 'baja' ? ' · <b>baja el ' + M.fechaCorta(c.fecha_baja) + '</b> (' + esc(c.motivo_baja || 'sin motivo') + ')' : '') + '</p>' +
       (c.objetivo ? '<p class="small"><b>Objetivo:</b> ' + esc(c.objetivo) + '</p>' : '') +
-      '<div class="acts">' + (c.telefono ? '<a class="btn btn-wa btn-xs" target="_blank" rel="noopener" href="' + esc(M.wa('Hola ' + (c.nombre || '').split(' ')[0] + ', ', M.telWa(c.telefono))) + '">WhatsApp</a>' : '') + '<a class="btn btn-g btn-xs" target="_blank" rel="noopener" href="' + esc(M.gmail(c.email, '', 'Hola ' + (c.nombre || '').split(' ')[0] + ':\n\n' + firma)) + '">Email</a><button class="btn btn-p btn-xs" id="f-vender">Vender bono</button>' +
-      (c.estado === 'activa' ? '<button class="btn btn-l btn-xs" id="f-baja">Dar de baja</button>' : '<button class="btn btn-l btn-xs" id="f-alta">Reactivar</button>') + '</div>' +
+      '<div class="acts">' + (c.telefono ? '<a class="btn btn-wa btn-xs" target="_blank" rel="noopener" href="' + esc(M.wa('Hola ' + (c.nombre || '').split(' ')[0] + ', ', M.telWa(c.telefono))) + '">WhatsApp</a>' : '') + '<button class="btn btn-g btn-xs" id="f-clave">Nueva contraseña</button><button class="btn btn-p btn-xs" id="f-vender">Vender bono</button>' +
+      (c.estado === 'activa' ? '<button class="btn btn-l btn-xs" id="f-baja">Dar de baja</button>' : '<button class="btn btn-l btn-xs" id="f-alta">Reactivar</button>') + '<button class="btn btn-l btn-xs" id="f-borrar">Eliminar cuenta</button></div>' +
       '<p class="eyebrow">Bonos</p>' + (bs.length ? bs.map((b) => '<div class="row"><div class="l"><b>' + esc(b.nombre) + '</b><span>' + M.eur(b.precio) + ' · ' + esc(b.metodo_pago) + ' · ' + (b.estado_pago === 'pagado' ? (quedan(b) != null ? quedan(b) + ' de ' + b.clases_total + ' · ' : '') + 'hasta ' + M.fechaCorta(b.caduca) : b.estado_pago) + '</span></div>' + (b.estado_pago === 'pendiente' ? '<button class="btn btn-p btn-xs" data-pag="' + b.id + '">Confirmar pago</button>' : activo(b) ? '<span class="pill ok">Activo</span>' : '<span class="pill">' + (b.estado_pago === 'anulado' ? 'Anulado' : 'Terminado') + '</span>') + '</div>').join('') : '<p class="empty">Sin bonos.</p>') +
       '<p class="eyebrow">Últimas clases</p>' + (rs.length ? rs.map((r) => '<div class="row"><div class="l"><b>' + esc(r.clases.titulo) + '</b><span>' + M.fechaCorta(r.clases.inicio) + ' · ' + M.hora(r.clases.inicio) + (r.enfoque ? ' · ' + esc(r.enfoque) : '') + '</span></div><span class="tiny muted">' + ({ confirmada: 'Reservada', asistio: 'Asistió', falta: 'Faltó' }[r.estado] || '') + '</span></div>').join('') : '<p class="empty">Sin clases todavía.</p>') +
       '<label class="field">Notas privadas<textarea id="f-notas" placeholder="Lesiones, preferencias, progresos…">' + esc(c.notas || '') + '</textarea></label>' +
@@ -281,6 +278,22 @@
       $('#f-guardar', w).onclick = async () => { const { error } = await sb.from('perfiles').update({ notas: $('#f-notas', w).value }).eq('id', id); if (error) return M.error(error); c.notas = $('#f-notas', w).value; M.toast('Notas guardadas'); };
       w.querySelectorAll('[data-pag]').forEach((b) => (b.onclick = async () => { const { error } = await sb.rpc('confirmar_pago', { p_bono: +b.dataset.pag }); if (error) return M.error(error); cerrar(); await refrescar(); ficha(id); M.toast('Pago confirmado'); }));
       $('#f-vender', w).onclick = () => { cerrar(); venta(id); };
+      $('#f-clave', w).onclick = async () => {
+        const { data, error } = await sb.functions.invoke('admin-alumnas', { body: { accion: 'clave', cliente_id: id } });
+        if (error || !data || !data.password) return M.toast((data && data.error) || 'No se ha podido crear la contraseña', true);
+        cerrar();
+        M.modal('<h3>Nueva contraseña</h3><p class="muted">Envíasela a ' + esc(c.nombre) + ' por WhatsApp. Podrá cambiarla en «Mi perfil».</p><p style="font-family:var(--f-mono);font-size:22px">' + esc(data.password) + '</p><div class="foot"><button class="btn btn-g btn-s" data-cerrar>Cerrar</button>' + (c.telefono ? '<a class="btn btn-wa btn-s" target="_blank" rel="noopener" href="' + esc(M.wa('Hola ' + pila(c) + ', tu nueva contraseña de Moba Training es: ' + data.password + '\nEntra con tu móvil en ' + BASE + 'cuenta.html y cámbiala en «Mi perfil».', M.telWa(c.telefono))) + '">Enviar por WhatsApp</a>' : '') + '</div>');
+      };
+      $('#f-borrar', w).onclick = () => {
+        cerrar();
+        M.modal('<h3>¿Eliminar la cuenta de ' + esc(c.nombre) + '?</h3><p class="muted">Se borran para siempre su cuenta, sus reservas y sus bonos, incluidas las ventas de la facturación. No se puede deshacer. Úsalo solo si te pide borrar sus datos; para dejar de atenderla, mejor «Dar de baja».</p><div class="foot"><button class="btn btn-g btn-s" data-cerrar>Volver</button><button class="btn btn-p btn-s" id="b-ok">Eliminar para siempre</button></div>', (w2, cerrar2) => {
+          $('#b-ok', w2).onclick = async () => {
+            const { data, error } = await sb.functions.invoke('admin-alumnas', { body: { accion: 'eliminar', cliente_id: id } });
+            if (error || !data || !data.ok) return M.toast((data && data.error) || 'No se ha podido eliminar', true);
+            cerrar2(); M.toast('Cuenta eliminada'); refrescar();
+          };
+        });
+      };
       const fb = $('#f-baja', w); if (fb) fb.onclick = async () => { const { error } = await sb.from('perfiles').update({ estado: 'baja', fecha_baja: new Date().toISOString(), motivo_baja: 'Baja dada por María' }).eq('id', id); if (error) return M.error(error); cerrar(); refrescar(); M.toast('Alumna dada de baja'); };
       const fa = $('#f-alta', w); if (fa) fa.onclick = async () => { const { error } = await sb.from('perfiles').update({ estado: 'activa', fecha_baja: null, motivo_baja: null }).eq('id', id); if (error) return M.error(error); cerrar(); refrescar(); M.toast('Alumna reactivada'); };
     });
@@ -300,8 +313,8 @@
   }
   $('#vender').onclick = () => venta(null);
   $('#invitar').onclick = () => {
-    const link = BASE + 'cuenta.html', txt = '¡Hola! Te paso el enlace para crear tu cuenta en Moba Training y reservar tus clases de pilates, yoga y funcional online. Tu primera clase en grupo es gratis: ' + link;
-    M.modal('<h3>Invitar a una alumna</h3><p class="small muted">Las alumnas se dan de alta ellas mismas con este enlace. Después aparecen aquí y puedes venderles bonos.</p><input class="inp" readonly value="' + esc(link) + '" id="i-link"><div class="foot"><button class="btn btn-g btn-s" id="i-copy">Copiar enlace</button><a class="btn btn-wa btn-s" target="_blank" rel="noopener" href="' + esc(M.wa(txt, '')).replace('https://wa.me/?', 'https://wa.me/?') + '">Enviar por WhatsApp</a><a class="btn btn-p btn-s" target="_blank" rel="noopener" href="' + esc(M.gmail('', 'Tu cuenta en Moba Training', txt + firma)) + '">Enviar por Gmail</a></div>', (w) => {
+    const link = BASE + 'cuenta.html', txt = '¡Hola! Te paso el enlace para crear tu cuenta en Moba Training y reservar tus clases de pilates, yoga y funcional online. Solo necesitas tu móvil y una contraseña. Tu primera clase en grupo es gratis: ' + link;
+    M.modal('<h3>Invitar a una alumna</h3><p class="small muted">Las alumnas se dan de alta ellas mismas con este enlace. Después aparecen aquí y puedes venderles bonos.</p><input class="inp" readonly value="' + esc(link) + '" id="i-link"><div class="foot"><button class="btn btn-g btn-s" id="i-copy">Copiar enlace</button><a class="btn btn-wa btn-s" target="_blank" rel="noopener" href="' + esc(M.wa(txt, '')).replace('https://wa.me/?', 'https://wa.me/?') + '">Enviar por WhatsApp</a></div>', (w) => {
       $('#i-copy', w).onclick = () => navigator.clipboard.writeText(link).then(() => M.toast('Enlace copiado'), () => $('#i-link', w).select());
     });
   };
@@ -340,7 +353,7 @@
     const cad = caducanPronto();
     $('#ret-cad').innerHTML = cad.length ? cad.map(filaCad).join('') : '<p class="empty">Nada por ahora.</p>';
     const rg = enRiesgo();
-    $('#ret-riesgo').innerHTML = rg.length ? rg.map(({ c, motivo }) => '<div class="row"><div class="l"><b>' + esc(c.nombre || c.email) + '</b><span>' + esc(motivo) + '</span>' + avisadoTxt(c.id) + '</div><div class="acts">' + (c.email ? '<a class="btn btn-p btn-xs" target="_blank" rel="noopener" data-avisar="vuelve" data-cli="' + c.id + '" href="' + esc(mailVuelve(c)) + '">Avisar</a>' : '') + (c.telefono ? '<a class="btn btn-g btn-xs" target="_blank" rel="noopener" href="' + esc(M.wa('Hola ' + (c.nombre || '').split(' ')[0] + ', ¡te echo de menos en clase! ¿Te reservo una plaza esta semana?', M.telWa(c.telefono))) + '">WhatsApp</a>' : '') + '</div></div>').join('') : '<p class="empty">Todas las alumnas activas están entrenando.</p>';
+    $('#ret-riesgo').innerHTML = rg.length ? rg.map(({ c, motivo }) => '<div class="row"><div class="l"><b>' + esc(c.nombre || c.email) + '</b><span>' + esc(motivo) + '</span>' + avisadoTxt(c.id) + '</div><div class="acts">' + (c.telefono ? '<a class="btn btn-wa btn-xs" target="_blank" rel="noopener" data-avisar="vuelve" data-cli="' + c.id + '" href="' + esc(waVuelve(c)) + '">Avisar por WhatsApp</a>' : '') + '</div></div>').join('') : '<p class="empty">Todas las alumnas activas están entrenando.</p>';
     const bajas = alumnas().filter((c) => c.estado === 'baja').sort((a, b) => (b.fecha_baja || '').localeCompare(a.fecha_baja || ''));
     $('#ret-bajas').innerHTML = bajas.length ? bajas.map((c) => '<div class="row"><div class="l"><b>' + esc(c.nombre || c.email) + '</b><span>' + (c.fecha_baja ? M.fechaCorta(c.fecha_baja) + ' · ' : '') + esc(c.motivo_baja || 'sin motivo') + '</span></div><button class="btn btn-g btn-xs" data-ficha="' + c.id + '">Ficha</button></div>').join('') : '<p class="empty">No hay bajas.</p>';
     botonAvisar($('#ret-cad')); botonAvisar($('#ret-riesgo'));
@@ -380,14 +393,6 @@
     $('#t-prod').innerHTML = PROD.map((p) => '<tr><td><b>' + esc(p.nombre) + '</b><br><span class="tiny muted">' + esc(p.descripcion || '') + '</span></td><td class="num">' + (p.clases == null ? 'Ilimitado' : p.clases) + '</td><td class="num">' + p.dias_validez + ' días</td><td class="r"><input class="inp" type="number" step="0.01" min="0" style="max-width:100px;text-align:right" id="pr-' + p.id + '" value="' + p.precio + '"></td><td><input type="checkbox" id="ac-' + p.id + '"' + (p.activo ? ' checked' : '') + ' aria-label="En venta"></td><td><button class="btn btn-g btn-xs" data-prod="' + p.id + '">Guardar</button></td></tr>').join('');
     $$('[data-prod]').forEach((b) => (b.onclick = async () => { const id = b.dataset.prod; const { error } = await sb.from('productos').update({ precio: +$('#pr-' + id).value, activo: $('#ac-' + id).checked }).eq('id', id); if (error) return M.error(error); M.toast('Precio guardado'); refrescar(); }));
   }
-
-  // ================= CONTACTOS =================
-  function pContactos() {
-    $('#t-sus').innerHTML = S.length ? S.map((s) => '<tr><td>' + esc(s.email) + '</td><td class="small">' + M.fechaCorta(s.creado) + '</td><td><button class="btn btn-l btn-xs" data-sdel="' + s.id + '">Borrar</button></td></tr>').join('') : '<tr><td colspan="3" class="empty">Aún nadie ha pedido la guía.</td></tr>';
-    $('#gmail-todos').href = 'https://mail.google.com/mail/?view=cm&fs=1&bcc=' + encodeURIComponent(S.map((s) => s.email).join(',')) + '&su=' + encodeURIComponent('Tu guía de 7 ejercicios para la espalda') + '&body=' + encodeURIComponent('¡Hola!\n\nAquí tienes la guía que pediste en la web de Moba Training (adjunta en este email).\n\nSi quieres probar una clase en directo, la primera en grupo es gratis: ' + BASE + firma);
-    $$('[data-sdel]').forEach((b) => (b.onclick = async () => { const { error } = await sb.from('suscriptores').delete().eq('id', +b.dataset.sdel); if (error) return M.error(error); refrescar(); }));
-  }
-  $('#copiar-mails').onclick = () => navigator.clipboard.writeText(S.map((s) => s.email).join(', ')).then(() => M.toast('Emails copiados'), () => M.toast('No se han podido copiar', true));
 
   await refrescar();
 })();

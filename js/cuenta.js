@@ -5,47 +5,43 @@
   $('#nav-wa').href = M.wa('Hola María, tengo una pregunta sobre mi cuenta de Moba Training.');
 
   // ================= ACCESO =================
-  const vista = (f) => { ['f-login', 'f-reg', 'f-nueva'].forEach((x) => ($('#' + x).hidden = x !== f)); $('#a-ok').hidden = true; $('#a-login').setAttribute('aria-selected', f === 'f-login'); $('#a-reg').setAttribute('aria-selected', f === 'f-reg'); };
+  const vista = (f) => { ['f-login', 'f-reg'].forEach((x) => ($('#' + x).hidden = x !== f)); $('#a-ok').hidden = true; $('#a-login').setAttribute('aria-selected', f === 'f-login'); $('#a-reg').setAttribute('aria-selected', f === 'f-reg'); };
   $('#a-login').onclick = () => vista('f-login');
   $('#a-reg').onclick = () => vista('f-reg');
   const ok = (m) => { const e = $('#a-ok'); e.textContent = m; e.hidden = false; };
+  const traducir = (error) => {
+    const m = error && error.message || '';
+    if (m === 'Invalid login credentials') return M.toast('Móvil o contraseña incorrectos.', true);
+    if (m === 'User already registered') return M.toast('Ya hay una cuenta con ese móvil. Entra con tu contraseña.', true);
+    if (/confirm/i.test(m)) return M.toast('Ahora mismo no se pueden crear cuentas. Escribe a María por WhatsApp.', true);
+    M.error(error);
+  };
 
   $('#f-login').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const { error } = await sb.auth.signInWithPassword({ email: $('#l-mail').value.trim(), password: $('#l-pass').value });
-    if (error) return M.error(error);
+    const tel = $('#l-tel').value.trim();
+    if (!M.telValido(tel)) return M.toast('Escribe tu móvil', true);
+    const { error } = await sb.auth.signInWithPassword({ email: M.emailDeTel(tel), password: $('#l-pass').value });
+    if (error) return traducir(error);
     arrancar();
   });
-  $('#l-olvido').onclick = async () => {
-    const mail = $('#l-mail').value.trim();
-    if (!/^\S+@\S+\.\S+$/.test(mail)) return M.toast('Escribe primero tu email arriba', true);
-    const { error } = await sb.auth.resetPasswordForEmail(mail, { redirectTo: location.origin + location.pathname });
-    if (error) return M.error(error);
-    ok('Te hemos enviado un email para cambiar la contraseña.');
-  };
+  $('#l-olvido').href = M.wa('Hola María, he olvidado la contraseña de mi cuenta de Moba Training. ¿Me das una nueva?');
   $('#f-reg').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const nombre = $('#r-nombre').value.trim(), mail = $('#r-mail').value.trim(), tel = $('#r-tel').value.trim(), pass = $('#r-pass').value;
-    if (!nombre || !/^\S+@\S+\.\S+$/.test(mail)) return M.toast('Escribe tu nombre y un email válido', true);
-    if (tel.replace(/\D/g, '').length < 9) return M.toast('Escribe tu móvil con WhatsApp: las clases son por videollamada', true);
+    const nombre = $('#r-nombre').value.trim(), tel = $('#r-tel').value.trim(), pass = $('#r-pass').value;
+    if (!nombre) return M.toast('Escribe tu nombre', true);
+    if (!M.telValido(tel)) return M.toast('Escribe tu móvil con WhatsApp: es tu usuario y el número de las videollamadas', true);
     if (pass.length < 6) return M.toast('La contraseña debe tener al menos 6 caracteres', true);
     if (!$('#r-legal').checked) return M.toast('Acepta la política de privacidad para crear la cuenta', true);
     const { data, error } = await sb.auth.signUp({
-      email: mail, password: pass,
-      options: { emailRedirectTo: location.origin + location.pathname + location.search, data: { nombre, telefono: tel, acepta_emails: $('#r-emails').checked } }
+      email: M.emailDeTel(tel), password: pass,
+      options: { data: { nombre, telefono: tel, acepta_emails: $('#r-emails').checked } }
     });
-    if (error) return M.error(error);
+    if (error) return traducir(error);
     if (data.session) return arrancar();
-    ok('¡Cuenta creada! Te hemos enviado un email: pulsa el enlace para confirmarla y entrar.');
+    ok('Cuenta creada, pero no se ha podido iniciar sesión. Escribe a María por WhatsApp para activarla.');
     $('#f-reg').hidden = true;
   });
-  $('#f-nueva').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const { error } = await sb.auth.updateUser({ password: $('#n-pass').value });
-    if (error) return M.error(error);
-    M.toast('Contraseña cambiada'); arrancar();
-  });
-  sb.auth.onAuthStateChange((ev) => { if (ev === 'PASSWORD_RECOVERY') { $('#v-app').hidden = true; $('#v-auth').hidden = false; vista('f-nueva'); } });
 
   // ================= APP =================
   let yo = null, bonos = [], misRes = [], productos = [];
@@ -158,19 +154,14 @@
     const personal = c.tipo === 'personal';
     const tieneBono = bonos.some((b) => activo(b) && (personal ? b.tipo === 'personal' : ['grupo', 'completo', 'prueba'].includes(b.tipo)));
     const prueba = !personal && !bonos.some((b) => b.tipo === 'prueba');
-    const sinTel = !yo.telefono || yo.telefono.replace(/\D/g, '').length < 9;
     M.modal('<h3>' + esc(c.titulo) + '</h3><p class="muted">' + M.fecha(c.inicio) + ' · ' + M.hora(c.inicio) + ' · ' + c.duracion_min + ' min</p>' +
       (personal ? '<label class="field">¿Qué quieres trabajar?<select id="m-enf"><option>Fuerza y tonificación</option><option>Recuperación o prevención de lesiones</option><option>Pilates</option><option>Yoga</option><option>Funcional</option><option>Otro objetivo</option></select></label>' : '') +
-      (sinTel ? '<label class="field">Tu móvil con WhatsApp<input id="m-tel" type="tel" placeholder="600 000 000"><span class="tiny muted" style="font-weight:400">María te llamará por videollamada a este número.</span></label>' : '<p class="small">María te llamará por <b>videollamada de WhatsApp</b> al <b>' + esc(yo.telefono) + '</b>.</p>') +
+      '<p class="small">María te llamará por <b>videollamada de WhatsApp</b> al <b>' + esc(yo.telefono) + '</b>.</p>' +
       (tieneBono ? '<p class="okmsg">Se descontará de tu bono.</p>' : prueba ? '<p class="okmsg">Es tu primera clase en grupo: ¡gratis!</p>' : '<p class="err">Necesitas un bono ' + (personal ? 'de entrenamiento personal' : 'de clases en grupo') + ' pagado para reservar.</p>') +
       '<div class="foot"><button class="btn btn-g btn-s" data-cerrar>Cancelar</button>' + (tieneBono || prueba ? '<button class="btn btn-p btn-s" id="m-ok">Confirmar reserva</button>' : '<button class="btn btn-p btn-s" id="m-comprar">Ver bonos</button>') + '</div>', (w, cerrar) => {
       const comprar = $('#m-comprar', w); if (comprar) comprar.onclick = () => { cerrar(); tab('bonos'); };
       const okb = $('#m-ok', w); if (!okb) return;
       okb.onclick = async () => {
-        if (sinTel) {
-          const t = $('#m-tel', w).value.trim(); if (t.replace(/\D/g, '').length < 9) return M.toast('Escribe tu móvil con WhatsApp', true);
-          await sb.rpc('actualizar_perfil', { p_nombre: yo.nombre, p_telefono: t, p_objetivo: yo.objetivo || '', p_acepta: yo.acepta_emails }); yo.telefono = t;
-        }
         okb.disabled = true;
         const { error } = await sb.rpc('reservar', { p_clase: c.id, p_enfoque: personal ? $('#m-enf', w).value : null });
         okb.disabled = false;
@@ -239,13 +230,22 @@
   }
   $('#f-perfil').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const d = { p_nombre: $('#pf-nombre').value.trim(), p_telefono: $('#pf-tel').value.trim(), p_objetivo: $('#pf-obj').value.trim(), p_acepta: $('#pf-emails').checked };
+    const d = { p_nombre: $('#pf-nombre').value.trim(), p_email: $('#pf-mail').value.trim(), p_objetivo: $('#pf-obj').value.trim(), p_acepta: $('#pf-emails').checked };
     if (!d.p_nombre) return M.toast('Escribe tu nombre', true);
+    if (d.p_email && !/^\S+@\S+\.\S+$/.test(d.p_email)) return M.toast('El email no es válido (puedes dejarlo vacío)', true);
     const { error } = await sb.rpc('actualizar_perfil', d);
     if (error) return M.error(error);
-    Object.assign(yo, { nombre: d.p_nombre, telefono: d.p_telefono, objetivo: d.p_objetivo, acepta_emails: d.p_acepta });
+    Object.assign(yo, { nombre: d.p_nombre, email: d.p_email, objetivo: d.p_objetivo, acepta_emails: d.p_acepta });
     $('#saludo').textContent = 'Hola, ' + yo.nombre.split(' ')[0];
     M.toast('Datos guardados');
+  });
+  $('#f-clave').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const p = $('#pf-pass').value;
+    if (p.length < 6) return M.toast('La contraseña debe tener al menos 6 caracteres', true);
+    const { error } = await sb.auth.updateUser({ password: p });
+    if (error) return M.error(error);
+    $('#pf-pass').value = ''; M.toast('Contraseña cambiada');
   });
   $('#salir').onclick = M.salir;
   $('#baja').onclick = () => M.modal('<h3>Solicitar la baja</h3><label class="field">¿Nos cuentas el motivo? (opcional)<textarea id="m-mot"></textarea></label><div class="foot"><button class="btn btn-g btn-s" data-cerrar>Volver</button><button class="btn btn-p btn-s" id="m-ok">Darme de baja</button></div>', (w, cerrar) => {

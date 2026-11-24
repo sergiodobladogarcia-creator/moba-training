@@ -24,6 +24,9 @@
   // ---------- enlaces ----------
   M.wa = (texto, tel = C.whatsapp) => 'https://wa.me/' + String(tel).replace(/\D/g, '') + (texto ? '?text=' + encodeURIComponent(texto) : '');
   M.telWa = (t) => { let d = String(t || '').replace(/\D/g, ''); if (d.length === 9) d = '34' + d; return d; };
+  // El acceso es con móvil: cada número tiene un email interno que nunca recibe correos.
+  M.emailDeTel = (t) => M.telWa(t) + '@alumnas.mobatraining.es';
+  M.telValido = (t) => /^(34)?[6789]\d{8}$/.test(String(t || '').replace(/\D/g, '')) || String(t || '').replace(/\D/g, '').length >= 11;
   M.gmail = (to, asunto, cuerpo) => 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(to || '') + '&su=' + encodeURIComponent(asunto || '') + '&body=' + encodeURIComponent(cuerpo || '');
 
   // ---------- avisos ----------

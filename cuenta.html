@@ -31,26 +31,20 @@
       <div class="tabs" role="tablist" style="justify-self:start"><button role="tab" id="a-login" aria-selected="true">Entrar</button><button role="tab" id="a-reg" aria-selected="false">Crear cuenta</button></div>
       <form id="f-login" class="form" novalidate>
         <h2 style="font-size:26px">Hola de nuevo</h2>
-        <label class="field">Email<input id="l-mail" type="email" autocomplete="email" required></label>
+        <label class="field">Móvil<input id="l-tel" type="tel" autocomplete="tel" placeholder="600 000 000" required></label>
         <label class="field">Contraseña<input id="l-pass" type="password" autocomplete="current-password" required></label>
         <button class="btn btn-p" type="submit">Entrar</button>
-        <button class="btn btn-l" type="button" id="l-olvido">He olvidado mi contraseña</button>
+        <a class="btn btn-l" id="l-olvido" target="_blank" rel="noopener" href="#">He olvidado mi contraseña</a>
       </form>
       <form id="f-reg" class="form" novalidate hidden>
         <h2 style="font-size:26px">Crea tu cuenta</h2>
         <p class="small muted">Tu primera clase en grupo es gratis.</p>
         <label class="field">Nombre y apellidos<input id="r-nombre" autocomplete="name" required></label>
-        <label class="field">Email<input id="r-mail" type="email" autocomplete="email" required></label>
-        <label class="field">Móvil con WhatsApp<input id="r-tel" type="tel" autocomplete="tel" placeholder="600 000 000" required><span class="tiny muted" style="font-weight:400">Las clases son por videollamada de WhatsApp a este número.</span></label>
+        <label class="field">Móvil con WhatsApp<input id="r-tel" type="tel" autocomplete="tel" placeholder="600 000 000" required><span class="tiny muted" style="font-weight:400">Con este número entrarás en tu cuenta y María te llamará por videollamada de WhatsApp.</span></label>
         <label class="field">Contraseña<input id="r-pass" type="password" autocomplete="new-password" minlength="6" required></label>
         <label class="check"><input type="checkbox" id="r-legal"> He leído y acepto la <a href="legal.html#privacidad" target="_blank">política de privacidad</a> y las <a href="legal.html#condiciones" target="_blank">condiciones de reserva</a>.</label>
-        <label class="check"><input type="checkbox" id="r-emails"> Quiero recibir novedades, retos y avisos por email.</label>
+        <label class="check"><input type="checkbox" id="r-emails"> Quiero recibir novedades, retos y recordatorios por WhatsApp.</label>
         <button class="btn btn-p" type="submit">Crear cuenta</button>
-      </form>
-      <form id="f-nueva" class="form" novalidate hidden>
-        <h2 style="font-size:26px">Nueva contraseña</h2>
-        <label class="field">Escribe tu nueva contraseña<input id="n-pass" type="password" autocomplete="new-password" minlength="6" required></label>
-        <button class="btn btn-p" type="submit">Guardar contraseña</button>
       </form>
       <p class="okmsg" id="a-ok" hidden></p>
     </div>
@@ -120,13 +114,14 @@
       <form class="card form" id="f-perfil" novalidate>
         <h3>Mis datos</h3>
         <label class="field">Nombre y apellidos<input id="pf-nombre" autocomplete="name"></label>
-        <label class="field">Email<input id="pf-mail" disabled></label>
-        <label class="field">Móvil con WhatsApp<input id="pf-tel" type="tel" autocomplete="tel"></label>
+        <label class="field">Móvil con WhatsApp<input id="pf-tel" disabled><span class="tiny muted" style="font-weight:400">Es tu usuario para entrar. Para cambiarlo, escribe a María.</span></label>
+        <label class="field">Email (opcional)<input id="pf-mail" type="email" autocomplete="email"></label>
         <label class="field">Mi objetivo<textarea id="pf-obj" placeholder="Por ejemplo: fortalecer la espalda, recuperarme de una lesión de rodilla…"></textarea></label>
-        <label class="check"><input type="checkbox" id="pf-emails"> Quiero recibir novedades y avisos por email.</label>
+        <label class="check"><input type="checkbox" id="pf-emails"> Quiero recibir novedades, retos y recordatorios por WhatsApp.</label>
         <button class="btn btn-p" type="submit" style="justify-self:start">Guardar</button>
       </form>
       <div class="stack">
+        <form class="card form" id="f-clave" novalidate><h3>Cambiar contraseña</h3><label class="field">Nueva contraseña<input id="pf-pass" type="password" autocomplete="new-password" minlength="6"></label><button class="btn btn-g btn-s" style="justify-self:start">Cambiar contraseña</button></form>
         <div class="card"><h3>Sesión</h3><button class="btn btn-g btn-s" id="salir" style="justify-self:start">Cerrar sesión</button></div>
         <div class="card"><h3>Darme de baja</h3><p class="small muted">Tus bonos dejarán de poder usarse para reservar. Si cambias de idea, escribe a María y la reactiva.</p><button class="btn btn-g btn-s" id="baja" style="justify-self:start">Solicitar la baja</button></div>
       </div>

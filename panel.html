@@ -36,7 +36,6 @@
     <button role="tab" data-v="retencion">Bajas y avisos<span class="badge" id="b-ret" hidden></span></button>
     <button role="tab" data-v="videos">Vídeos</button>
     <button role="tab" data-v="tarifas">Tarifas</button>
-    <button role="tab" data-v="contactos">Contactos guía</button>
   </div>
 
   <!-- RESUMEN -->
@@ -49,7 +48,7 @@
       </div>
       <div class="stack">
         <div class="card"><h3>Pagos por confirmar</h3><div id="res-pend"></div></div>
-        <div class="card"><h3>Bonos que caducan pronto</h3><p class="tiny muted">«Avisar» abre un borrador de Gmail con un mensaje para que renueve.</p><div id="res-cad"></div></div>
+        <div class="card"><h3>Bonos que caducan pronto</h3><p class="tiny muted">«Avisar por WhatsApp» abre WhatsApp con un mensaje de motivación ya escrito para que renueve.</p><div id="res-cad"></div></div>
       </div>
     </div>
   </section>
@@ -112,11 +111,6 @@
     <div class="tbl"><table><thead><tr><th>Producto</th><th>Clases</th><th>Validez</th><th class="r">Precio</th><th>En venta</th><th></th></tr></thead><tbody id="t-prod"></tbody></table></div>
   </section>
 
-  <!-- CONTACTOS -->
-  <section class="view" id="p-contactos" hidden>
-    <div class="toolbar"><p class="small muted">Personas que pidieron la guía gratis desde la web.</p><span style="margin-left:auto" class="acts"><button class="btn btn-g btn-s" id="copiar-mails">Copiar emails</button><a class="btn btn-p btn-s" id="gmail-todos" target="_blank" rel="noopener" href="#">Escribir a todas en Gmail</a></span></div>
-    <div class="tbl"><table><thead><tr><th>Email</th><th>Fecha</th><th></th></tr></thead><tbody id="t-sus"></tbody></table></div>
-  </section>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
