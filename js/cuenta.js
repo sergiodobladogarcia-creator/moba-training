@@ -48,7 +48,7 @@
 
   async function arrancar() {
     const s = await M.sesion();
-    if (!s) { $('#v-auth').hidden = false; $('#v-app').hidden = true; if (qs.get('comprar') || qs.get('reservar')) vista('f-reg'); return; }
+    if (!s) { $('#v-auth').hidden = false; $('#v-app').hidden = true; if (qs.get('comprar') || qs.get('reservar') || qs.get('registro')) vista('f-reg'); return; }
     yo = await M.perfil();
     if (!yo) { M.toast('No encontramos tu perfil. Escribe a María.', true); return; }
     $('#v-auth').hidden = true; $('#v-app').hidden = false;
@@ -61,7 +61,7 @@
     await recargar();
     if (yo.estado === 'baja') M.toast('Tu cuenta está dada de baja. Escribe a María para reactivarla.', true);
     if (qs.get('reservar')) { abrirReserva(+qs.get('reservar')); limpiarURL(); }
-    else if (qs.get('comprar')) { abrirCompra(qs.get('comprar')); limpiarURL(); }
+    else if (qs.get('comprar')) { abrirActivar(qs.get('comprar')); limpiarURL(); }
     if (location.hash === '#videoteca') tab('videoteca');
   }
   const limpiarURL = () => history.replaceState(null, '', location.pathname + location.hash);
@@ -72,6 +72,7 @@
       sb.from('reservas').select('id,estado,enfoque,clase_id,clases(titulo,disciplina,tipo,inicio,duracion_min)').eq('cliente_id', yo.id).order('creada', { ascending: false }).limit(80)
     ]);
     bonos = b.data || []; misRes = (r.data || []).filter((x) => x.clases);
+    if (!videos.length) await cargarVideos();
     pintarInicio(); pintarBonos();
   }
 
@@ -85,22 +86,51 @@
   }
   $$('#tabs button').forEach((b) => (b.onclick = () => tab(b.dataset.v)));
 
-  // ---------- inicio ----------
+  // ---------- acceso según lo pagado ----------
   const activo = (b) => b.estado_pago === 'pagado' && b.caduca >= M.hoyISO() && (b.clases_total == null || b.clases_usadas < b.clases_total);
+  const acceso = {
+    grupo: () => bonos.some((b) => activo(b) && ['grupo', 'completo'].includes(b.tipo)),
+    personal: () => bonos.some((b) => activo(b) && b.tipo === 'personal'),
+    videos: () => bonos.some((b) => activo(b) && ['videoteca', 'completo'].includes(b.tipo)),
+    alguno: () => bonos.some((b) => activo(b) && b.tipo !== 'prueba')
+  };
+  const prodPorDefecto = { grupo: 'g4', personal: 'p4', videos: 'comp' };
+  let videos = [];
+  async function cargarVideos() {
+    const { data } = await sb.from('videos').select('id,titulo,disciplina,nivel,duracion_min,gratis,descripcion').order('creado', { ascending: false });
+    videos = data || [];
+  }
+  async function verVideo(id) {
+    const { data: url, error } = await sb.rpc('ver_video', { p_id: id });
+    if (error || !url) return M.toast('Este vídeo es para alumnas con la cuenta activada', true);
+    window.open(url, '_blank', 'noopener');
+  }
+
+  // ---------- inicio ----------
   function pintarInicio() {
+    const activada = acceso.alguno();
+    // Clase de prueba grabada (siempre visible con cuenta)
+    const pruebas = videos.filter((v) => v.gratis);
+    $('#prueba').innerHTML = activada ? '' : '<div class="card" style="background:var(--sun)"><span class="pill s" style="justify-self:start">Gratis con tu cuenta</span><h3>Tu clase de prueba</h3>' +
+      (pruebas.length ? pruebas.map((v) => '<div class="row"><div class="l"><b>' + esc(v.titulo) + '</b><span>' + esc(v.disciplina) + ' · ' + v.duracion_min + ' min · ' + esc(v.nivel) + '</span></div><button class="btn btn-p btn-s" data-ver="' + v.id + '">Ver clase</button></div>').join('') : '<p class="small muted">María está grabando la clase de prueba. Muy pronto la tendrás aquí.</p>') + '</div>';
+
     const prox = misRes.filter((r) => r.estado === 'confirmada' && new Date(r.clases.inicio) > new Date(Date.now() - 3600e3)).sort((a, b) => new Date(a.clases.inicio) - new Date(b.clases.inicio));
     $('#mis-clases').innerHTML = prox.length ? prox.map((r) => {
       const c = r.clases, horas = (new Date(c.inicio) - new Date()) / 3600e3;
       return '<div class="row"><div class="l"><b>' + esc(c.titulo) + '</b><span>' + M.fecha(c.inicio) + ' · ' + M.hora(c.inicio) + ' · ' + c.duracion_min + ' min' + (r.enfoque ? ' · ' + esc(r.enfoque) : '') + '</span></div><div class="acts">' +
         '<button class="btn btn-g btn-xs" data-cancel="' + r.id + '" data-tarde="' + (horas < C.horasCancelacion) + '">Cancelar</button></div></div>';
-    }).join('') : '<p class="empty">No tienes clases reservadas. <a href="#" data-ir="reservar">Reserva una</a>.</p>';
+    }).join('') : '<p class="empty">' + (activada ? 'No tienes clases reservadas. <a href="#" data-ir="reservar">Reserva una</a>.' : 'Cuando actives tu cuenta podrás reservar tus clases en directo aquí.') + '</p>';
     const pas = misRes.filter((r) => r.estado !== 'cancelada' && new Date(r.clases.inicio) < new Date()).slice(0, 6);
     $('#historial').innerHTML = pas.length ? pas.map((r) => '<div class="row"><div class="l"><b>' + esc(r.clases.titulo) + '</b><span>' + M.fechaCorta(r.clases.inicio) + '</span></div><span class="pill ' + (r.estado === 'falta' ? 'warn">No asististe' : 'ok">Hecha') + '</span></div>').join('') : '<p class="empty">Aquí verás las clases que vayas haciendo.</p>';
-    const act = bonos.filter(activo), pend = bonos.filter((b) => b.estado_pago === 'pendiente');
-    $('#mis-bonos-res').innerHTML = (act.length ? act.map(tarjetaBono).join('') : '<div class="card"><h3>Sin bonos activos</h3><p class="small muted">' + (bonos.some((b) => b.tipo === 'prueba') ? 'Elige un bono para seguir reservando.' : 'Tu primera clase en grupo es gratis: resérvala ya.') + '</p><button class="btn btn-p btn-s" data-ir="' + (bonos.some((b) => b.tipo === 'prueba') ? 'bonos' : 'reservar') + '" style="justify-self:start">' + (bonos.some((b) => b.tipo === 'prueba') ? 'Ver bonos' : 'Reservar clase gratis') + '</button></div>') +
-      (pend.length ? '<div class="card" style="margin-top:16px"><h3>Pendiente de pago</h3>' + pend.map((b) => '<div class="row"><div class="l"><b>' + esc(b.nombre) + '</b><span>' + M.eur(b.precio) + ' · ' + esc(b.metodo_pago) + '</span></div><span class="pill warn">Pendiente</span></div>').join('') + '<p class="tiny muted">Se activa cuando María confirme el pago.</p></div>' : '');
+
+    const act = bonos.filter(activo).filter((b) => b.tipo !== 'prueba'), pend = bonos.filter((b) => b.estado_pago === 'pendiente');
+    $('#mis-bonos-res').innerHTML = (act.length ? act.map(tarjetaBono).join('') :
+      '<div class="bono"><span class="eyebrow" style="color:inherit;opacity:.7">Tu cuenta</span><b class="big" style="font-size:28px">Pendiente de activar</b><span style="font-size:14px;opacity:.85">Elige tu plan, haz el pago y pídele a María la activación por WhatsApp. En cuanto la confirme se desbloquean tus clases y vídeos.</span><button class="btn btn-p btn-s" id="activar-ya" style="justify-self:start">Activar mi cuenta</button></div>') +
+      (pend.length ? '<div class="card" style="margin-top:16px"><h3>Activación solicitada</h3>' + pend.map((b) => '<div class="row"><div class="l"><b>' + esc(b.nombre) + '</b><span>' + M.eur(b.precio) + ' · ' + (b.metodo_pago === 'efectivo' ? 'en mano' : esc(b.metodo_pago)) + '</span></div><a class="btn btn-wa btn-xs" target="_blank" rel="noopener" href="' + esc(waActivar(productos.find((p) => p.id === b.producto_id) || { nombre: b.nombre, precio: b.precio }, b.metodo_pago)) + '">Recordar a María</a></div>').join('') + '<p class="tiny muted">María la activa en cuanto confirma tu pago.</p></div>' : '');
+    const ay = $('#activar-ya'); if (ay) ay.onclick = () => abrirActivar(null);
     $$('[data-ir]').forEach((a) => (a.onclick = (e) => { e.preventDefault(); tab(a.dataset.ir); }));
     $$('[data-cancel]').forEach((b) => (b.onclick = () => cancelar(+b.dataset.cancel, b.dataset.tarde === 'true')));
+    $$('#prueba [data-ver]').forEach((b) => (b.onclick = () => verVideo(+b.dataset.ver)));
   }
   function tarjetaBono(b) {
     const ilim = b.clases_total == null, quedan = ilim ? null : b.clases_total - b.clases_usadas;
@@ -129,6 +159,9 @@
     pintarSemana();
   }
   function pintarSemana() {
+    const puede = acceso[modo]();
+    $('#res-aviso').innerHTML = puede ? '' : '<div class="card" style="margin-bottom:14px"><h3>' + (modo === 'grupo' ? 'Activa tu cuenta para reservar clases en grupo' : 'Activa tu cuenta para reservar entrenamiento personal') + '</h3><p class="small muted">Puedes ver el horario, pero para reservar necesitas un bono ' + (modo === 'grupo' ? 'de clases en grupo o Moba Completo' : 'de entrenamiento personal') + ' activado por María.</p><button class="btn btn-p btn-s" id="res-act" style="justify-self:start">Activar mi cuenta</button></div>';
+    const ra = $('#res-act'); if (ra) ra.onclick = () => abrirActivar(prodPorDefecto[modo]);
     const mias = new Set(misRes.filter((r) => r.estado === 'confirmada').map((r) => r.clase_id));
     const lista = clases.filter((c) => c.tipo === modo);
     $('#days').innerHTML = M.DN.map((n, i) => { const d = M.masDias(semana, i), k = lista.filter((c) => M.mismoDia(c.inicio, d)).length; return '<button aria-pressed="' + (i === dia) + '" data-i="' + i + '"><small>' + n + '</small><b class="num">' + d.getDate() + '</b><i>' + (k ? k : '') + '</i></button>'; }).join('');
@@ -138,7 +171,7 @@
       const libres = c.plazas - c.ocupadas, mia = mias.has(c.id);
       return '<div class="slot"><time>' + M.hora(c.inicio) + '</time><div class="info"><b>' + esc(c.titulo) + '</b><span>' + esc(c.disciplina) + ' · ' + c.duracion_min + ' min · ' + esc(c.nivel) + '</span>' +
         (modo === 'grupo' ? '<div class="cap"><span class="bar"><i style="width:' + (c.ocupadas / c.plazas * 100) + '%"></i></span><span class="num">' + (libres > 0 ? libres + ' de ' + c.plazas + ' libres' : 'Completa') + '</span></div>' : '') + '</div>' +
-        (mia ? '<span class="pill ok">Reservada</span>' : libres > 0 ? '<button class="btn btn-p btn-s" data-res="' + c.id + '">Reservar</button>' : '<button class="btn btn-g btn-s" disabled>Completa</button>') + '</div>';
+        (mia ? '<span class="pill ok">Reservada</span>' : libres <= 0 ? '<button class="btn btn-g btn-s" disabled>Completa</button>' : puede ? '<button class="btn btn-p btn-s" data-res="' + c.id + '">Reservar</button>' : '<button class="btn btn-g btn-s" disabled title="Disponible al activar tu cuenta">Al activar tu cuenta</button>') + '</div>';
     }).join('') : '<p class="empty">No hay ' + (modo === 'grupo' ? 'clases' : 'huecos libres') + ' este día. Prueba otro día o <a href="' + M.wa('Hola María, busco un hueco para ' + (modo === 'grupo' ? 'una clase' : 'entrenamiento personal') + ' esta semana.') + '" target="_blank" rel="noopener">escribe a María</a>.</p>';
     $$('[data-res]').forEach((b) => (b.onclick = () => abrirReserva(+b.dataset.res)));
   }
@@ -152,15 +185,12 @@
     const { data: c } = await sb.from('clases').select('*').eq('id', id).maybeSingle();
     if (!c || c.estado !== 'programada' || new Date(c.inicio) < new Date()) return M.toast('Esta clase ya no está disponible', true);
     const personal = c.tipo === 'personal';
-    const tieneBono = bonos.some((b) => activo(b) && (personal ? b.tipo === 'personal' : ['grupo', 'completo', 'prueba'].includes(b.tipo)));
-    const prueba = !personal && !bonos.some((b) => b.tipo === 'prueba');
+    if (!acceso[personal ? 'personal' : 'grupo']()) { tab('reservar'); return abrirActivar(personal ? 'p4' : 'g4'); }
     M.modal('<h3>' + esc(c.titulo) + '</h3><p class="muted">' + M.fecha(c.inicio) + ' · ' + M.hora(c.inicio) + ' · ' + c.duracion_min + ' min</p>' +
       (personal ? '<label class="field">¿Qué quieres trabajar?<select id="m-enf"><option>Fuerza y tonificación</option><option>Recuperación o prevención de lesiones</option><option>Pilates</option><option>Yoga</option><option>Funcional</option><option>Otro objetivo</option></select></label>' : '') +
-      '<p class="small">María te llamará por <b>videollamada de WhatsApp</b> al <b>' + esc(yo.telefono) + '</b>.</p>' +
-      (tieneBono ? '<p class="okmsg">Se descontará de tu bono.</p>' : prueba ? '<p class="okmsg">Es tu primera clase en grupo: ¡gratis!</p>' : '<p class="err">Necesitas un bono ' + (personal ? 'de entrenamiento personal' : 'de clases en grupo') + ' pagado para reservar.</p>') +
-      '<div class="foot"><button class="btn btn-g btn-s" data-cerrar>Cancelar</button>' + (tieneBono || prueba ? '<button class="btn btn-p btn-s" id="m-ok">Confirmar reserva</button>' : '<button class="btn btn-p btn-s" id="m-comprar">Ver bonos</button>') + '</div>', (w, cerrar) => {
-      const comprar = $('#m-comprar', w); if (comprar) comprar.onclick = () => { cerrar(); tab('bonos'); };
-      const okb = $('#m-ok', w); if (!okb) return;
+      '<p class="small">María te llamará por <b>videollamada de WhatsApp</b> al <b>' + esc(yo.telefono) + '</b>.</p><p class="okmsg">Se descontará de tu bono.</p>' +
+      '<div class="foot"><button class="btn btn-g btn-s" data-cerrar>Cancelar</button><button class="btn btn-p btn-s" id="m-ok">Confirmar reserva</button></div>', (w, cerrar) => {
+      const okb = $('#m-ok', w);
       okb.onclick = async () => {
         okb.disabled = true;
         const { error } = await sb.rpc('reservar', { p_clase: c.id, p_enfoque: personal ? $('#m-enf', w).value : null });
@@ -173,55 +203,57 @@
     });
   }
 
-  // ---------- bonos ----------
+  // ---------- activar (bonos) ----------
+  const metodoTxt = (m) => (m === 'efectivo' ? 'en mano' : m);
+  function waActivar(p, met) {
+    return M.wa('Hola María, soy ' + yo.nombre + ' (' + yo.telefono + '). Quiero activar mi cuenta de Moba Training con «' + p.nombre + '» (' + M.eur(p.precio) + (p.mensual ? '/mes' : '') + '). Lo pago ' + (met === 'efectivo' ? 'en mano' : 'por ' + met) + '.');
+  }
   function pintarBonos() {
-    $('#lista-bonos').innerHTML = bonos.length ? bonos.map((b) => {
-      const est = b.estado_pago === 'pendiente' ? '<span class="pill warn">Pendiente de pago</span>' : b.estado_pago === 'anulado' ? '<span class="pill">Anulado</span>' : activo(b) ? '<span class="pill ok">Activo</span>' : '<span class="pill">Terminado</span>';
+    $('#lista-bonos').innerHTML = bonos.filter((b) => b.tipo !== 'prueba').length ? bonos.filter((b) => b.tipo !== 'prueba').map((b) => {
+      const est = b.estado_pago === 'pendiente' ? '<span class="pill warn">Pendiente de activar</span>' : b.estado_pago === 'anulado' ? '<span class="pill">Anulado</span>' : activo(b) ? '<span class="pill ok">Activo</span>' : '<span class="pill">Terminado</span>';
       const uso = b.clases_total == null ? 'Ilimitado' : (b.clases_total - b.clases_usadas) + ' de ' + b.clases_total + ' clases';
-      return '<div class="row"><div class="l"><b>' + esc(b.nombre) + '</b><span>' + uso + ' · ' + (b.estado_pago === 'pagado' ? 'hasta ' + M.fechaCorta(b.caduca) : M.eur(b.precio) + ' por ' + esc(b.metodo_pago)) + '</span></div>' + est + '</div>';
-    }).join('') : '<p class="empty">Todavía no tienes bonos.</p>';
-    const grupos = [['Clases en grupo', 'grupo'], ['Entrenamiento personal', 'personal'], ['Videoteca y Moba Completo', 'x']];
+      return '<div class="row"><div class="l"><b>' + esc(b.nombre) + '</b><span>' + uso + ' · ' + (b.estado_pago === 'pagado' ? 'hasta ' + M.fechaCorta(b.caduca) : M.eur(b.precio) + ' · ' + esc(metodoTxt(b.metodo_pago))) + '</span></div>' + est + '</div>';
+    }).join('') : '<p class="empty">Todavía no tienes ningún plan activado.</p>';
+    const grupos = [['Clases en grupo en directo', 'grupo'], ['Entrenamiento personal', 'personal'], ['Videoteca y Moba Completo', 'x']];
     $('#tienda').innerHTML = grupos.map(([t, k]) => '<p class="eyebrow" style="margin-top:6px">' + t + '</p>' + productos.filter((p) => k === 'x' ? ['videoteca', 'completo'].includes(p.tipo) : p.tipo === k).map((p) =>
       '<div class="row"><div class="l"><b>' + esc(p.nombre) + '</b><span>' + esc(p.descripcion || '') + '</span></div><button class="btn btn-g btn-xs" data-comprar="' + p.id + '">' + M.eur(p.precio) + (p.mensual ? '/mes' : '') + '</button></div>').join('')).join('');
-    $$('[data-comprar]').forEach((b) => (b.onclick = () => abrirCompra(b.dataset.comprar)));
+    $$('[data-comprar]').forEach((b) => (b.onclick = () => abrirActivar(b.dataset.comprar)));
   }
-  function abrirCompra(id) {
-    const p = productos.find((x) => x.id === id); if (!p) return;
-    tab('bonos');
-    M.modal('<h3>' + esc(p.nombre) + '</h3><p class="muted">' + esc(p.descripcion || '') + '</p><p style="font-family:var(--f-display);font-size:34px;font-weight:800">' + M.eur(p.precio) + (p.mensual ? '<small style="font-size:15px"> / mes</small>' : '') + '</p>' +
+  function abrirActivar(id) {
+    if (!productos.length) return;
+    const sel = productos.find((x) => x.id === id) || productos.find((x) => x.id === 'g4') || productos[0];
+    M.modal('<h3>Activar mi cuenta</h3><p class="small muted">Elige tu plan, haz el pago y pulsa el botón: se abrirá WhatsApp con el mensaje para María. En cuanto confirme el pago, tu cuenta se activa.</p>' +
+      '<label class="field">Plan<select id="m-prod">' + productos.map((p) => '<option value="' + p.id + '"' + (p.id === sel.id ? ' selected' : '') + '>' + esc(p.nombre) + ' · ' + M.eur(p.precio) + (p.mensual ? '/mes' : '') + '</option>').join('') + '</select></label>' +
       '<label class="field">¿Cómo vas a pagar?<select id="m-met"><option value="bizum">Bizum</option>' + (C.iban ? '<option value="transferencia">Transferencia</option>' : '') + '<option value="efectivo">En mano</option></select></label>' +
       '<div id="m-inst" class="small muted"></div>' +
-      '<div class="foot"><button class="btn btn-g btn-s" data-cerrar>Cancelar</button><button class="btn btn-p btn-s" id="m-ok">Solicitar</button></div>', (w, cerrar) => {
-      const inst = () => {
-        const m = $('#m-met', w).value;
-        $('#m-inst', w).innerHTML = m === 'bizum' ? 'Haz un Bizum de <b>' + M.eur(p.precio) + '</b> al <b>' + esc(C.whatsappVisible) + '</b> con el concepto «Moba ' + esc(yo.nombre.split(' ')[0]) + '».' : m === 'transferencia' ? 'Transfiere <b>' + M.eur(p.precio) + '</b> a la cuenta <b>' + esc(C.iban) + '</b> con el concepto «Moba ' + esc(yo.nombre) + '».' : 'Paga a María en mano y ella activará tu bono.';
-        $('#m-inst', w).innerHTML += ' Tu bono se activa en cuanto María confirme el pago, y la validez empieza ese día.';
+      '<div class="foot"><button class="btn btn-g btn-s" data-cerrar>Cancelar</button><a class="btn btn-wa btn-s" id="m-ok" target="_blank" rel="noopener" href="#">Pedir activación por WhatsApp</a></div>', (w, cerrar) => {
+      const actual = () => productos.find((x) => x.id === $('#m-prod', w).value);
+      const pintar = () => {
+        const p = actual(), m = $('#m-met', w).value;
+        $('#m-inst', w).innerHTML = (m === 'bizum' ? 'Haz un Bizum de <b>' + M.eur(p.precio) + '</b> al <b>' + esc(C.whatsappVisible) + '</b> con el concepto «Moba ' + esc(yo.nombre.split(' ')[0]) + '».' : m === 'transferencia' ? 'Transfiere <b>' + M.eur(p.precio) + '</b> a la cuenta <b>' + esc(C.iban) + '</b> con el concepto «Moba ' + esc(yo.nombre) + '».' : 'Paga a María en mano.') + ' La validez empieza el día que María active tu cuenta.';
+        $('#m-ok', w).href = waActivar(p, m);
       };
-      $('#m-met', w).onchange = inst; inst();
-      $('#m-ok', w).onclick = async () => {
-        const met = $('#m-met', w).value;
-        const { error } = await sb.rpc('solicitar_bono', { p_producto: p.id, p_metodo: met });
-        if (error) return M.error(error);
-        cerrar(); await recargar();
-        M.modal('<h3>Solicitud enviada</h3><p class="muted">Cuando hagas el pago, avisa a María para que active tu bono.</p><div class="foot"><a class="btn btn-wa btn-s" target="_blank" rel="noopener" href="' + M.wa('Hola María, soy ' + yo.nombre + '. He solicitado «' + p.nombre + '» (' + M.eur(p.precio) + ') y lo pago por ' + (met === 'efectivo' ? 'en mano' : met) + '.') + '">Avisar a María por WhatsApp</a><button class="btn btn-p btn-s" data-cerrar>Hecho</button></div>');
-      };
+      $('#m-prod', w).onchange = pintar; $('#m-met', w).onchange = pintar; pintar();
+      $('#m-ok', w).addEventListener('click', () => {
+        sb.rpc('solicitar_bono', { p_producto: actual().id, p_metodo: $('#m-met', w).value }).then(({ error }) => { if (error) M.error(error); else recargar(); });
+        setTimeout(() => { cerrar(); M.toast('Solicitud enviada. María activará tu cuenta al confirmar el pago.'); }, 300);
+      });
     });
   }
 
   // ---------- videoteca ----------
   async function pintarVideos() {
-    const acceso = bonos.some((b) => activo(b) && ['videoteca', 'completo'].includes(b.tipo));
-    $('#vid-acceso').innerHTML = acceso ? '<p class="okmsg">Tienes acceso a toda la videoteca.</p>' : '<div class="card"><h3>Desbloquea la videoteca</h3><p class="small muted">Con la suscripción de videoteca o Moba Completo puedes ver todos los vídeos. Los marcados como «Gratis» están abiertos para todas.</p><div class="acts"><button class="btn btn-p btn-s" data-comprar2="vid">Videoteca</button><button class="btn btn-g btn-s" data-comprar2="comp">Moba Completo</button></div></div>';
-    $$('[data-comprar2]').forEach((b) => (b.onclick = () => abrirCompra(b.dataset.comprar2)));
-    const { data } = await sb.from('videos').select('id,titulo,disciplina,nivel,duracion_min,gratis,descripcion').order('creado', { ascending: false });
-    const I = window.MOBA_ICON || {};
-    $('#vid-lista').innerHTML = (data || []).length ? data.map((v) => '<article class="vid"><div class="thumb" data-d="' + esc(v.disciplina) + '"><span class="dur num">' + v.duracion_min + ' min</span><span class="lock pill ' + (v.gratis ? 'g">Gratis' : 'a">Suscriptoras') + '</span></div><div class="body"><b>' + esc(v.titulo) + '</b><span>' + esc(v.disciplina) + ' · ' + esc(v.nivel) + '</span>' +
-      ((acceso || v.gratis) ? '<button class="btn btn-p btn-xs" style="justify-self:start;margin-top:6px" data-ver="' + v.id + '">Ver vídeo</button>' : '') + '</div></article>').join('') : '<div class="soon"><span class="pill s">Muy pronto</span><h3>María está grabando los primeros vídeos</h3><p class="muted">Te avisaremos en cuanto estén disponibles.</p></div>';
-    $$('[data-ver]').forEach((b) => (b.onclick = async () => {
-      const { data: url, error } = await sb.rpc('ver_video', { p_id: +b.dataset.ver });
-      if (error || !url) return M.toast('Este vídeo aún no está disponible', true);
-      window.open(url, '_blank', 'noopener');
-    }));
+    await cargarVideos();
+    const ok = acceso.videos();
+    $('#vid-acceso').innerHTML = ok ? '<p class="okmsg">Tienes acceso a toda la videoteca.</p>' : '<div class="card"><h3>Desbloquea la videoteca</h3><p class="small muted">Con tu cuenta puedes ver la clase de prueba. Para ver todos los vídeos, activa la videoteca o Moba Completo.</p><div class="acts"><button class="btn btn-p btn-s" data-act="comp">Moba Completo</button><button class="btn btn-g btn-s" data-act="vid">Solo videoteca</button></div></div>';
+    $$('[data-act]').forEach((b) => (b.onclick = () => abrirActivar(b.dataset.act)));
+    $('#vid-lista').innerHTML = videos.length ? videos.map((v) => {
+      const abierto = ok || v.gratis;
+      return '<article class="vid"><div class="thumb" data-d="' + esc(v.disciplina) + '"><span class="dur num">' + v.duracion_min + ' min</span><span class="lock pill ' + (v.gratis ? 'g">Clase de prueba' : abierto ? 'ok">Incluido' : 'a">🔒 Con tu plan') + '</span></div><div class="body"><b>' + esc(v.titulo) + '</b><span>' + esc(v.disciplina) + ' · ' + esc(v.nivel) + '</span>' +
+        (abierto ? '<button class="btn btn-p btn-xs" style="justify-self:start;margin-top:6px" data-ver="' + v.id + '">Ver vídeo</button>' : '<button class="btn btn-g btn-xs" style="justify-self:start;margin-top:6px" data-act="comp">Desbloquear</button>') + '</div></article>';
+    }).join('') : '<div class="soon"><span class="pill s">Muy pronto</span><h3>María está grabando los primeros vídeos</h3><p class="muted">Te avisaremos en cuanto estén disponibles.</p></div>';
+    $$('#vid-lista [data-ver]').forEach((b) => (b.onclick = () => verVideo(+b.dataset.ver)));
+    $$('#vid-lista [data-act]').forEach((b) => (b.onclick = () => abrirActivar(b.dataset.act)));
   }
 
   // ---------- perfil ----------

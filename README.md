@@ -22,8 +22,9 @@ HTML, CSS y JavaScript sin compilación. Base de datos y cuentas en Supabase (pr
 
 - **Clases en directo:** por videollamada de WhatsApp. Al reservar, la alumna ve que María la llamará a su número. En la agenda, «Ver» muestra los teléfonos de cada clase, con botón de WhatsApp y «Copiar teléfonos» para montar el grupo.
 - **Grupos de máximo 6 personas** (lo controla la base de datos).
-- **Primera clase en grupo gratis:** se crea sola al reservar la primera vez.
-- **Pagos:** la alumna solicita el bono y paga por Bizum, transferencia o en mano. María pulsa «Confirmar pago» y el bono se activa ese día y recibe número de factura. Las ventas cobradas en mano se registran con «Registrar venta».
+- **Nada gratis salvo la clase de prueba:** quien crea una cuenta sin pagar solo ve la **clase de prueba grabada** (en «Vídeos», marcar «Clase de prueba»). El horario se ve, pero no puede reservar, y la videoteca sale con candados. El bloqueo está en el servidor, no solo en la pantalla.
+- **Activación por WhatsApp:** la alumna elige plan en «Activar mi cuenta» y se abre WhatsApp con el mensaje para María (nombre, móvil, plan y forma de pago). La petición aparece en el panel como «Solicitud de activación»; al recibir el pago, María pulsa «Confirmar pago» y se desbloquea lo comprado. Las cuentas que no han pedido nada salen en «Cuentas sin activar», con botón de WhatsApp y «Activar».
+- **Pagos:** la alumna pide la activación y paga por Bizum o en mano. María pulsa «Confirmar pago» y el bono se activa ese día y recibe número de factura. Las ventas cobradas en mano se registran con «Registrar venta».
 - **Cancelaciones:** hasta 8 h antes, la clase vuelve al bono.
 - **Avisos de renovación:** en «Bajas y avisos» y en el resumen, «Avisar por WhatsApp» abre WhatsApp con un mensaje de motivación ya escrito para renovar. Queda anotado cuándo se avisó.
 - **Eliminar cuenta:** en la ficha de la alumna, solo si pide borrar sus datos (borra también sus bonos y reservas). Para dejar de atenderla, «Dar de baja».

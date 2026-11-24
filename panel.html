@@ -47,7 +47,8 @@
         <div class="card"><h3>Ingresos de los últimos 6 meses</h3><div class="bars" id="bars"></div></div>
       </div>
       <div class="stack">
-        <div class="card"><h3>Pagos por confirmar</h3><div id="res-pend"></div></div>
+        <div class="card"><h3>Solicitudes de activación</h3><p class="tiny muted">Alumnas que han pedido un plan. Cuando recibas el pago, pulsa «Confirmar pago» y su cuenta se activa.</p><div id="res-pend"></div></div>
+        <div class="card"><h3>Cuentas sin activar</h3><p class="tiny muted">Se han registrado pero aún no han pedido ningún plan: solo ven la clase de prueba.</p><div id="res-sin"></div></div>
         <div class="card"><h3>Bonos que caducan pronto</h3><p class="tiny muted">«Avisar por WhatsApp» abre WhatsApp con un mensaje de motivación ya escrito para que renueve.</p><div id="res-cad"></div></div>
       </div>
     </div>
@@ -68,7 +69,7 @@
   <section class="view" id="p-clientes" hidden>
     <div class="toolbar">
       <input class="inp" id="buscar" placeholder="Buscar por nombre, email o teléfono" aria-label="Buscar alumna">
-      <div class="tabs" id="filtro-cli"><button aria-selected="true" data-f="activas">Activas</button><button aria-selected="false" data-f="todas">Todas</button><button aria-selected="false" data-f="bajas">Bajas</button></div>
+      <div class="tabs" id="filtro-cli"><button aria-selected="true" data-f="activas">Activas</button><button aria-selected="false" data-f="sinactivar">Sin activar</button><button aria-selected="false" data-f="todas">Todas</button><button aria-selected="false" data-f="bajas">Bajas</button></div>
       <span class="small muted" id="n-cli" style="margin-left:auto"></span>
     </div>
     <div class="tbl"><table><thead><tr><th>Alumna</th><th>Contacto</th><th>Bono</th><th>Última clase</th><th>Alta</th><th></th></tr></thead><tbody id="t-cli"></tbody></table></div>

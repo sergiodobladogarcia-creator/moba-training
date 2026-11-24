@@ -44,15 +44,24 @@
       .filter((b) => !activosDe(b.cliente_id).some((o) => o.id !== b.id && o.tipo === b.tipo && o.caduca > b.caduca))
       .sort((a, b) => a.caduca.localeCompare(b.caduca));
   }
+  // Registradas que nunca han pagado ni pedido un plan
+  const pagadoAlgunaVez = (id) => bonosDe(id).some((b) => b.estado_pago === 'pagado' && b.tipo !== 'prueba');
+  const sinActivar = () => alumnas().filter((c) => c.estado === 'activa' && !pagadoAlgunaVez(c.id) && !bonosDe(c.id).some((b) => b.estado_pago === 'pendiente'));
+  function filaSinActivar(c) {
+    const d = Math.floor((new Date() - new Date(c.fecha_alta)) / 86400000);
+    const txt = '¡Hola ' + ((c.nombre || '').split(' ')[0] || '') + '! 😊 Soy María, de Moba Training. He visto que has creado tu cuenta: ¿qué te ha parecido la clase de prueba? Si quieres, te ayudo a elegir el plan que mejor te encaje y te activo la cuenta hoy mismo.';
+    return '<div class="row"><div class="l"><b>' + esc(c.nombre || c.telefono) + '</b><span>' + esc(c.telefono) + ' · registrada ' + (d === 0 ? 'hoy' : 'hace ' + d + ' d') + '</span>' + avisadoTxt(c.id) + '</div><div class="acts">' +
+      (c.telefono ? '<a class="btn btn-wa btn-xs" target="_blank" rel="noopener" data-avisar="activar" data-cli="' + c.id + '" href="' + esc(M.wa(txt, M.telWa(c.telefono))) + '">WhatsApp</a>' : '') +
+      '<button class="btn btn-p btn-xs" data-activar="' + c.id + '">Activar</button></div></div>';
+  }
   function enRiesgo() {
     const cad = new Set(caducanPronto().map((b) => b.cliente_id));
     const hace21 = M.masDias(new Date(), -21);
-    return alumnas().filter((c) => c.estado === 'activa' && !cad.has(c.id)).map((c) => {
+    return alumnas().filter((c) => c.estado === 'activa' && !cad.has(c.id) && pagadoAlgunaVez(c.id)).map((c) => {
       const ult = ultimaClase(c.id), act = activosDe(c.id), todos = bonosDe(c.id).filter((b) => b.estado_pago === 'pagado');
       let motivo = null;
       if (todos.length && !act.length) motivo = 'Bono terminado sin renovar';
       else if (ult && new Date(ult) < hace21) motivo = 'Sin clases desde el ' + M.fechaCorta(ult);
-      else if (!ult && new Date(c.fecha_alta) < hace21) motivo = 'Se registró y aún no ha hecho ninguna clase';
       return motivo ? { c, motivo } : null;
     }).filter(Boolean);
   }
@@ -130,6 +139,10 @@
     const vals = meses.map(([m]) => ing(m)), max = Math.max(...vals, 1);
     $('#bars').innerHTML = meses.map(([, l], i) => '<div><span class="num">' + (vals[i] ? Math.round(vals[i]) + ' €' : '') + '</span><i style="height:' + (vals[i] / max * 110) + 'px"></i><span>' + l + '</span></div>').join('');
     pintarPendientes($('#res-pend'));
+    const sa = sinActivar();
+    $('#res-sin').innerHTML = sa.length ? sa.slice(0, 8).map(filaSinActivar).join('') : '<p class="empty">Todas las cuentas registradas tienen un plan o lo han pedido.</p>';
+    botonAvisar($('#res-sin'));
+    $$('#res-sin [data-activar]').forEach((b) => (b.onclick = () => venta(b.dataset.activar)));
     const cad = caducanPronto();
     $('#res-cad').innerHTML = cad.length ? cad.slice(0, 6).map(filaCad).join('') : '<p class="empty">Ningún bono caduca en los próximos 10 días.</p>';
     botonAvisar($('#res-cad'));
@@ -256,12 +269,13 @@
   $('#buscar').oninput = () => pClientes();
   function pClientes() {
     const q = $('#buscar').value.trim().toLowerCase();
-    const lista = alumnas().filter((c) => filtroCli === 'todas' || (filtroCli === 'bajas' ? c.estado === 'baja' : c.estado === 'activa'))
+    const sinAct = new Set(sinActivar().map((c) => c.id));
+    const lista = alumnas().filter((c) => filtroCli === 'todas' || (filtroCli === 'bajas' ? c.estado === 'baja' : filtroCli === 'sinactivar' ? sinAct.has(c.id) : c.estado === 'activa'))
       .filter((c) => !q || [c.nombre, c.email, c.telefono].join(' ').toLowerCase().includes(q));
     $('#n-cli').textContent = lista.length + (lista.length === 1 ? ' alumna' : ' alumnas');
     $('#t-cli').innerHTML = lista.length ? lista.map((c) => {
       const act = activosDe(c.id), ult = ultimaClase(c.id), pend = bonosDe(c.id).some((b) => b.estado_pago === 'pendiente');
-      return '<tr><td><b>' + esc(c.nombre || '—') + '</b>' + (c.estado === 'baja' ? ' <span class="pill warn">Baja</span>' : '') + (pend ? ' <span class="pill s">Pago pendiente</span>' : '') + '</td><td class="small">' + esc(c.email) + '<br>' + esc(c.telefono) + '</td><td class="small">' + (act.length ? act.map((b) => esc(b.nombre) + (quedan(b) != null ? ' (' + quedan(b) + ')' : '')).join('<br>') : '<span class="muted">Sin bono</span>') + '</td><td class="small">' + (ult ? M.fechaCorta(ult) : '<span class="muted">—</span>') + '</td><td class="small">' + M.fechaCorta(c.fecha_alta) + '</td><td><button class="btn btn-g btn-xs" data-ficha="' + c.id + '">Ficha</button></td></tr>';
+      return '<tr><td><b>' + esc(c.nombre || '—') + '</b>' + (c.estado === 'baja' ? ' <span class="pill warn">Baja</span>' : '') + (pend ? ' <span class="pill s">Pide activación</span>' : sinAct.has(c.id) ? ' <span class="pill">Sin activar</span>' : '') + '</td><td class="small">' + esc(c.email) + '<br>' + esc(c.telefono) + '</td><td class="small">' + (act.length ? act.map((b) => esc(b.nombre) + (quedan(b) != null ? ' (' + quedan(b) + ')' : '')).join('<br>') : '<span class="muted">Sin bono</span>') + '</td><td class="small">' + (ult ? M.fechaCorta(ult) : '<span class="muted">—</span>') + '</td><td class="small">' + M.fechaCorta(c.fecha_alta) + '</td><td><button class="btn btn-g btn-xs" data-ficha="' + c.id + '">Ficha</button></td></tr>';
     }).join('') : '<tr><td colspan="6" class="empty">No hay alumnas en esta lista. Comparte el enlace de registro con «Invitar a una alumna».</td></tr>';
     $$('[data-ficha]').forEach((b) => (b.onclick = () => ficha(b.dataset.ficha)));
   }
@@ -313,7 +327,7 @@
   }
   $('#vender').onclick = () => venta(null);
   $('#invitar').onclick = () => {
-    const link = BASE + 'cuenta.html', txt = '¡Hola! Te paso el enlace para crear tu cuenta en Moba Training y reservar tus clases de pilates, yoga y funcional online. Solo necesitas tu móvil y una contraseña. Tu primera clase en grupo es gratis: ' + link;
+    const link = BASE + 'cuenta.html', txt = '¡Hola! Te paso el enlace para crear tu cuenta en Moba Training y reservar tus clases de pilates, yoga y funcional online. Solo necesitas tu móvil y una contraseña, y al entrar puedes ver gratis una clase de prueba: ' + link;
     M.modal('<h3>Invitar a una alumna</h3><p class="small muted">Las alumnas se dan de alta ellas mismas con este enlace. Después aparecen aquí y puedes venderles bonos.</p><input class="inp" readonly value="' + esc(link) + '" id="i-link"><div class="foot"><button class="btn btn-g btn-s" id="i-copy">Copiar enlace</button><a class="btn btn-wa btn-s" target="_blank" rel="noopener" href="' + esc(M.wa(txt, '')).replace('https://wa.me/?', 'https://wa.me/?') + '">Enviar por WhatsApp</a></div>', (w) => {
       $('#i-copy', w).onclick = () => navigator.clipboard.writeText(link).then(() => M.toast('Enlace copiado'), () => $('#i-link', w).select());
     });
@@ -362,7 +376,7 @@
 
   // ================= VÍDEOS =================
   function pVideos() {
-    $('#t-vid').innerHTML = V.length ? V.map((v) => '<tr><td><b>' + esc(v.titulo) + '</b><br><span class="tiny muted">' + esc(v.nivel) + '</span></td><td>' + esc(v.disciplina) + '</td><td class="num">' + v.duracion_min + ' min</td><td>' + (v.gratis ? '<span class="pill g">Gratis</span>' : '<span class="pill a">Suscriptoras</span>') + '</td><td>' + (v.publicado ? '<span class="pill ok">Publicado</span>' : '<span class="pill">Borrador</span>') + '</td><td><button class="btn btn-g btn-xs" data-vid="' + v.id + '">Editar</button></td></tr>').join('') : '<tr><td colspan="6" class="empty">Todavía no hay vídeos. Cuando los grabes, súbelos y añádelos aquí.</td></tr>';
+    $('#t-vid').innerHTML = V.length ? V.map((v) => '<tr><td><b>' + esc(v.titulo) + '</b><br><span class="tiny muted">' + esc(v.nivel) + '</span></td><td>' + esc(v.disciplina) + '</td><td class="num">' + v.duracion_min + ' min</td><td>' + (v.gratis ? '<span class="pill g">Clase de prueba</span>' : '<span class="pill a">Con plan</span>') + '</td><td>' + (v.publicado ? '<span class="pill ok">Publicado</span>' : '<span class="pill">Borrador</span>') + '</td><td><button class="btn btn-g btn-xs" data-vid="' + v.id + '">Editar</button></td></tr>').join('') : '<tr><td colspan="6" class="empty">Todavía no hay vídeos. Cuando los grabes, súbelos y añádelos aquí.</td></tr>';
     $$('[data-vid]').forEach((b) => (b.onclick = () => formVideo(V.find((v) => v.id === +b.dataset.vid))));
   }
   async function formVideo(v) {
@@ -373,7 +387,7 @@
       '<label class="field">Duración (min)<input type="number" id="vi-dur" value="' + (v ? v.duracion_min : 20) + '"></label>' +
       '<label class="field">Enlace del vídeo<input id="vi-url" value="' + esc(v && v.url || '') + '" placeholder="https://vimeo.com/… o https://drive.google.com/…"></label>' +
       '<label class="field">Descripción<textarea id="vi-desc">' + esc(v && v.descripcion || '') + '</textarea></label>' +
-      '<label class="check"><input type="checkbox" id="vi-gratis"' + (v && v.gratis ? ' checked' : '') + '> Gratis para todas (sirve de muestra)</label>' +
+      '<label class="check"><input type="checkbox" id="vi-gratis"' + (v && v.gratis ? ' checked' : '') + '> Clase de prueba: la ven gratis todas las cuentas registradas, aunque no hayan pagado</label>' +
       '<label class="check"><input type="checkbox" id="vi-pub"' + (!v || v.publicado ? ' checked' : '') + '> Publicado</label>' +
       '<div class="foot">' + (v ? '<button type="button" class="btn btn-l" id="vi-del" style="margin-right:auto">Eliminar</button>' : '') + '<button type="button" class="btn btn-g btn-s" data-cerrar>Cerrar</button><button class="btn btn-p btn-s">Guardar</button></div></form>', (w, cerrar) => {
       $('#fvid', w).addEventListener('submit', async (e) => {

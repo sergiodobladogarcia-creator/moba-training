@@ -38,7 +38,7 @@
       </form>
       <form id="f-reg" class="form" novalidate hidden>
         <h2 style="font-size:26px">Crea tu cuenta</h2>
-        <p class="small muted">Tu primera clase en grupo es gratis.</p>
+        <p class="small muted">Con tu cuenta podrás ver gratis una clase de prueba grabada. Después, activa tu plan por WhatsApp.</p>
         <label class="field">Nombre y apellidos<input id="r-nombre" autocomplete="name" required></label>
         <label class="field">Móvil con WhatsApp<input id="r-tel" type="tel" autocomplete="tel" placeholder="600 000 000" required><span class="tiny muted" style="font-weight:400">Con este número entrarás en tu cuenta y María te llamará por videollamada de WhatsApp.</span></label>
         <label class="field">Contraseña<input id="r-pass" type="password" autocomplete="new-password" minlength="6" required></label>
@@ -60,7 +60,7 @@
   <div class="app-tabs" role="tablist" id="tabs">
     <button role="tab" data-v="inicio" aria-selected="true">Inicio</button>
     <button role="tab" data-v="reservar">Reservar</button>
-    <button role="tab" data-v="bonos">Bonos y pagos</button>
+    <button role="tab" data-v="bonos">Mi plan</button>
     <button role="tab" data-v="videoteca">Videoteca</button>
     <button role="tab" data-v="perfil">Mi perfil</button>
   </div>
@@ -68,6 +68,7 @@
   <section class="view" id="p-inicio">
     <div class="g2">
       <div class="stack">
+        <div id="prueba"></div>
         <div class="card"><h3>Mis próximas clases</h3><div id="mis-clases"></div></div>
         <div class="card"><h3>Mi historial</h3><div id="historial"></div></div>
       </div>
@@ -88,6 +89,7 @@
       <div class="tabs" role="tablist"><button role="tab" id="t-grupo" aria-selected="true">Clases en grupo</button><button role="tab" id="t-personal" aria-selected="false">Entrenamiento personal</button></div>
       <span style="margin-left:auto;display:flex;gap:6px;align-items:center"><button class="btn btn-g btn-xs" id="w-prev" aria-label="Semana anterior">←</button><span class="small num" id="w-lbl"></span><button class="btn btn-g btn-xs" id="w-next" aria-label="Semana siguiente">→</button></span>
     </div>
+    <div id="res-aviso"></div>
     <div class="days" id="days"></div>
     <div class="slots" id="slots"></div>
     <p class="tiny muted" style="margin-top:12px">Cancelación gratuita hasta 8 horas antes: la clase vuelve a tu bono.</p>
@@ -96,10 +98,10 @@
   <section class="view" id="p-bonos" hidden>
     <div class="g2">
       <div class="stack">
-        <div class="card"><h3>Mis bonos</h3><div id="lista-bonos"></div></div>
+        <div class="card"><h3>Mis planes</h3><div id="lista-bonos"></div></div>
       </div>
       <div class="stack">
-        <div class="card"><h3>Comprar un bono o cuota</h3><div id="tienda"></div></div>
+        <div class="card"><h3>Activar un plan</h3><p class="tiny muted">Elige el plan, paga por Bizum o en mano y pide la activación por WhatsApp.</p><div id="tienda"></div></div>
       </div>
     </div>
   </section>

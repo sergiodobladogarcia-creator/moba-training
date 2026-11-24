@@ -76,7 +76,7 @@
     else if (ans[2] === 'v') { plan = 'Moba Completo (clases + videoteca)'; }
     else if (ans[1] === '2') { plan = 'Clases en grupo ilimitadas'; }
     if (ans[1] === '0' && modo === 'grupo') why += ' Empieza por las clases de nivel inicial o «todos».';
-    $('#quiz-r').innerHTML = '<span class="eyebrow">Te recomiendo</span><h3>' + esc(cl) + '</h3><p class="muted">' + esc(why) + '</p><div class="prow"><span>Plan ideal</span><b>' + esc(plan) + '</b></div><a class="btn btn-p" href="' + dest + '" data-modo="' + modo + '">' + (modo === 'grupo' ? 'Ver clases y probar gratis' : 'Ver huecos de entrenamiento personal') + '</a>';
+    $('#quiz-r').innerHTML = '<span class="eyebrow">Te recomiendo</span><h3>' + esc(cl) + '</h3><p class="muted">' + esc(why) + '</p><div class="prow"><span>Plan ideal</span><b>' + esc(plan) + '</b></div><a class="btn btn-p" href="' + (modo === 'grupo' ? 'cuenta.html?registro=1' : dest) + '" data-modo="' + modo + '">' + (modo === 'grupo' ? 'Ver la clase de prueba gratis' : 'Ver huecos de entrenamiento personal') + '</a>';
     $('#quiz-r [data-modo]').onclick = () => setModo(modo);
   }
   renderQ();
@@ -136,7 +136,7 @@
     }
     $('#chips').innerHTML = ['Todo', 'Pilates', 'Yoga', 'Funcional'].map((x) => '<button aria-pressed="' + (x === filtro) + '">' + x + '</button>').join('');
     M.$$('#chips button').forEach((b) => (b.onclick = () => { filtro = b.textContent; renderV(); }));
-    $('#vids').innerHTML = lista.map((v) => '<a class="vid" href="cuenta.html#videoteca" style="color:inherit;text-decoration:none"><div class="thumb" data-d="' + esc(v.disciplina) + '">' + (ICON[v.disciplina] || '') + '<span class="dur num">' + v.duracion_min + ' min</span><span class="lock pill ' + (v.gratis ? 'g">Gratis' : 'a">Suscriptoras') + '</span></div><div class="body"><b>' + esc(v.titulo) + '</b><span>' + esc(v.disciplina) + ' · ' + esc(v.nivel) + '</span></div></a>').join('') || '<p class="empty">No hay vídeos de esta disciplina todavía.</p>';
+    $('#vids').innerHTML = lista.map((v) => '<a class="vid" href="cuenta.html#videoteca" style="color:inherit;text-decoration:none"><div class="thumb" data-d="' + esc(v.disciplina) + '">' + (ICON[v.disciplina] || '') + '<span class="dur num">' + v.duracion_min + ' min</span><span class="lock pill ' + (v.gratis ? 'g">Clase de prueba gratis' : 'a">🔒 Con tu plan') + '</span></div><div class="body"><b>' + esc(v.titulo) + '</b><span>' + esc(v.disciplina) + ' · ' + esc(v.nivel) + '</span></div></a>').join('') || '<p class="empty">No hay vídeos de esta disciplina todavía.</p>';
   }
   renderV();
 
@@ -147,7 +147,7 @@
   const grupo = (prods || []).filter((p) => p.tipo === 'grupo'), pers = (prods || []).filter((p) => p.tipo === 'personal');
   const minPrecio = (l) => l.length ? Math.min(...l.map((p) => +p.precio)) : 0;
   $('#plans').innerHTML =
-    '<div class="plan"><span class="pill a" style="justify-self:start">En grupo</span><h3>Clases en directo</h3><div class="price num"><small>desde </small>' + M.eur(minPrecio(grupo)) + '<small> / clase</small></div>' + grupo.map((p) => fila(p, p.clases === 1 ? 'Clase suelta' : p.clases ? 'Bono ' + p.clases : 'Ilimitado')).join('') + '<ul><li>Grupos de máximo 6 personas</li><li>Correcciones en directo</li><li>Primera clase gratis</li></ul></div>' +
+    '<div class="plan"><span class="pill a" style="justify-self:start">En grupo</span><h3>Clases en directo</h3><div class="price num"><small>desde </small>' + M.eur(minPrecio(grupo)) + '<small> / clase</small></div>' + grupo.map((p) => fila(p, p.clases === 1 ? 'Clase suelta' : p.clases ? 'Bono ' + p.clases : 'Ilimitado')).join('') + '<ul><li>Grupos de máximo 6 personas</li><li>Correcciones en directo</li></ul></div>' +
     '<div class="plan"><span class="pill g" style="justify-self:start">1 a 1</span><h3>Entrenamiento personal</h3><div class="price num"><small>desde </small>' + M.eur(minPrecio(pers.filter((p) => p.id !== 'duo'))) + '<small> / sesión</small></div>' + pers.map((p) => fila(p, p.id === 'duo' ? 'Dúo (2 personas)' : p.clases === 1 ? 'Sesión suelta' : 'Bono ' + p.clases)).join('') + '<p class="small">Tú eliges el enfoque:</p><ul><li>Fuerza y tonificación</li><li>Recuperación y prevención de lesiones</li><li>Pilates, yoga o funcional a tu medida</li><li>La actividad u objetivo que tú decidas</li></ul></div>' +
     (P.vid ? '<div class="plan"><span class="pill s" style="justify-self:start">Bajo demanda</span><h3>Videoteca</h3><div class="price num">' + M.eur(P.vid.precio) + '<small> / mes</small></div><ul><li>Todos los vídeos</li><li>Nuevos vídeos cada semana</li><li>Sin permanencia</li></ul><a class="btn btn-g btn-s" href="cuenta.html?comprar=vid">Suscribirme</a></div>' : '') +
     (P.comp ? '<div class="plan hl"><span class="pill a" style="justify-self:start">Más completo</span><h3>Moba Completo</h3><div class="price num"><small>desde </small>' + M.eur(P.comp.precio) + '<small> / mes</small></div><ul><li>Clases en grupo ilimitadas</li><li>Videoteca incluida</li><li class="muted">Sin permanencia</li></ul><a class="btn btn-p btn-s" href="cuenta.html?comprar=comp">Lo quiero</a></div>' : '');
