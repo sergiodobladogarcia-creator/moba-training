@@ -4,7 +4,7 @@ Web de clases online de pilates, yoga y entrenamiento funcional de **María Hern
 
 - `index.html` — web pública: horario real, test, tarifas, videoteca, retos, sobre mí, regalo, guía gratis y preguntas frecuentes.
 - `cuenta.html` — área de la alumna: registro, reservas, bonos y pagos, videoteca y perfil.
-- `panel.html` — panel de María: resumen, agenda, alumnas, facturación, bajas y avisos, vídeos, tarifas y contactos.
+- `panel.html` — panel de María: resumen, agenda, alumnas, facturación, bajas y avisos, vídeos y tarifas.
 - `legal.html` — aviso legal, privacidad, cookies y condiciones de reserva.
 
 HTML, CSS y JavaScript sin compilación. Base de datos y cuentas en Supabase (proyecto `moba-training`, id `qvzkkrvruknxyrmktkmw`, región París). Publicada con GitHub Pages.
